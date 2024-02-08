@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View, SafeAreaView, Image, TouchableOpacity, TextInput } from 'react-native'
 import React, { useState, useEffect } from 'react'
+import { URL } from './HomeScreen';
 
 const PersonalDetailsScreen = ({ navigation, route }) => {
     const [username, setusername] = useState('');
@@ -64,7 +65,7 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
             seterrors(showErrors && errors)
             console.log(errors);
         } else {
-            const response = await fetch("http://192.168.1.50:3000/users", {
+            const response = await fetch(`${URL}/users`, {
                 method: 'PUT',
                 body: JSON.stringify({
                     id: Date.now() + Math.random(),

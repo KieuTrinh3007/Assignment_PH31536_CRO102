@@ -1,108 +1,115 @@
-import { StyleSheet, Text, View, StatusBar, ImageBackground, Image, TouchableOpacity, Pressable } from 'react-native'
-import React, {useState, useEffect} from 'react'
+import { StyleSheet, Text, View, StatusBar, ImageBackground, Image, TouchableOpacity, Pressable, ScrollView } from 'react-native'
+import React, { useState, useEffect } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { produce } from 'immer';
+import { URL } from './HomeScreen';
 
 
-const DetailsScreen = ({navigation, route}) => {
+const DetailsScreen = ({ navigation, route }) => {
 
-  const {image, title, price, rate, description} = route.params;
+  const { image, title, price, rate, description, giaSP } = route.params;
 
-   // State để lưu trữ kích thước hiện tại của sản phẩm (S, M, L)
-   const [size, setSize] = useState('S');
+  // State để lưu trữ kích thước hiện tại của sản phẩm (S, M, L)
+  const [size, setSize] = useState('S');
 
-   // yêu thích
+  // yêu thích
 
-   const [isLiked, setIsLiked] = useState(false); 
+  const [isLiked, setIsLiked] = useState(false);
 
-   useEffect(() => {
+  useEffect(() => {
     // Kiểm tra xem sản phẩm có trong danh sách yêu thích hay không
     checkIsLiked();
   }, []);
 
   const checkIsLiked = async () => {
     try {
-      const favoritesData = await AsyncStorage.getItem('favorites');
-      if (favoritesData) {
-        const favorites = JSON.parse(favoritesData);
-        setIsLiked(favorites.includes(route.params.id));
+      const response = await fetch(`${URL}/favorites?id=${route.params.id}`);
+      const result = await response.json();
+      if(result?.length){
+        setIsLiked(true)
       }
     } catch (error) {
       console.error('Lỗi khi kiểm tra trạng thái yêu thích:', error);
     }
   };
-  
+
   const handleLikePress = async (productId) => {
-    try {
-      // Lấy danh sách sản phẩm đã được yêu thích từ AsyncStorage
-      const favoritesData = await AsyncStorage.getItem('favorites');
-      let favorites = [];
-      
-      if (favoritesData) {
-        favorites = JSON.parse(favoritesData);
-      }
-  
-      // Thêm hoặc xóa sản phẩm khỏi danh sách yêu thích tùy thuộc vào trạng thái trước đó
-      const isProductLiked = favorites.includes(productId);
-      // if (isProductLiked) {
-      //   // Nếu sản phẩm đã yêu thích, loại bỏ nó khỏi danh sách
-      //   const updatedFavorites = favorites.filter(item => item !== route.params.id);
-      //   await AsyncStorage.setItem('favorites', JSON.stringify(updatedFavorites));
-      //   setIsLiked(false); 
-      // } else {
-      //   // Nếu sản phẩm chưa yêu thích, thêm nó vào danh sách
-      //   favorites.push(productId);
-      //   await AsyncStorage.setItem('favorites', JSON.stringify(favorites));
-      //   setIsLiked(true); 
-      // }
-      const updatedFavorites = produce(favorites, (draftFavorites) => {
-        if (isProductLiked) {
-            return draftFavorites.filter(item => item !== productId);
-        } else {
-            draftFavorites.push(productId);
-        }
-    });
+    if(isLiked){
+      const response = await fetch(`${URL}/favorites/${route.params.id}`, {method: 'DELETE'});
+    const result = await response.json();
 
-    await AsyncStorage.setItem('favorites', JSON.stringify(updatedFavorites));
-    setIsLiked(!isProductLiked);
-     
-    } catch (error) {
-      console.error('Lỗi khi lưu trạng thái yêu thích:', error);
-    }
-  };
-  
-
-   const [currentPrice, setCurrentPrice] = useState(price);
-
-   // Hàm để cập nhật kích thước khi người dùng chọn
-   const handleSizeSelection = (selectedSize) => {
-     setSize(selectedSize);
-     console.log(price);
-     if (price && Array.isArray(price)) {
-     // Cập nhật giá tương ứng với kích thước được chọn
-     
-     const selectedPrice = price.find(item => item.size === selectedSize);
-    //  setCurrentPrice(selectedPrice ? selectedPrice.price : 'N/A');
-    if (selectedPrice) {
-      setCurrentPrice(selectedPrice.price);
     } else {
-      // Nếu không tìm thấy giá cho kích thước đã chọn, đặt giá hiện tại là 'N/A'
+      const response = await fetch(`${URL}/favorites`, {
+        method: 'POST',
+        headers: {
+           'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({'id': productId}),
+    });
+    const result = await response.json();
+    }
+    setIsLiked(!isLiked)
+    // setIsLiked(favorites.includes(productId));
+   
+    // try {
+    //   // Lấy danh sách sản phẩm đã được yêu thích từ AsyncStorage
+    //   const favoritesData = await AsyncStorage.getItem('favorites');
+    //   let favorites = [];
+
+    //   if (favoritesData) {
+    //     favorites = JSON.parse(favoritesData);
+    //   }
+
+    //   // Thêm hoặc xóa sản phẩm khỏi danh sách yêu thích tùy thuộc vào trạng thái trước đó
+    //   const isProductLiked = favorites.includes(productId);
+    //   // if (isProductLiked) {
+    //   //   // Nếu sản phẩm đã yêu thích, loại bỏ nó khỏi danh sách
+    //   //   const updatedFavorites = favorites.filter(item => item !== route.params.id);
+    //   //   await AsyncStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+    //   //   setIsLiked(false); 
+    //   // } else {
+    //   //   // Nếu sản phẩm chưa yêu thích, thêm nó vào danh sách
+    //   //   favorites.push(productId);
+    //   //   await AsyncStorage.setItem('favorites', JSON.stringify(favorites));
+    //   //   setIsLiked(true); 
+    //   // }
+    //   const updatedFavorites = produce(favorites, (draftFavorites) => {
+    //     if (isProductLiked) {
+    //       return draftFavorites.filter(item => item !== productId);
+    //     } else {
+    //       draftFavorites.push(productId);
+    //     }
+    //   });
+
+    //   await AsyncStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+    //   setIsLiked(!isProductLiked);
+
+    // } catch (error) {
+    //   console.error('Lỗi khi lưu trạng thái yêu thích:', error);
+    // }
+  };
+
+
+  const [currentPrice, setCurrentPrice] = useState(price);
+
+  // Hàm để cập nhật kích thước khi người dùng chọn
+  const handleSizeSelection = (data) => {
+    setSize(data.size);
+    if(data.price){
+      setCurrentPrice(data.price);
+    } else {
       setCurrentPrice('N/A');
     }
-  } else {
-    // Nếu price không phải là một mảng, in ra một thông báo hoặc xử lý theo cách phù hợp
-    setCurrentPrice(price);
-  }
-   };
+  };
 
-    // Hàm để lấy giá của sản phẩm dựa trên kích thước hiện tại
+  // Hàm để lấy giá của sản phẩm dựa trên kích thước hiện tại
   // const getPriceForSize = () => {
   //   // Lấy giá tương ứng với kích thước hiện tại từ mảng giá sản phẩm
   //   const selectedPrice = price.find(item => item.size === size);
   //   // Kiểm tra nếu tồn tại giá cho kích thước này thì trả về giá đó, ngược lại trả về 'N/A'
   //   return selectedPrice ? selectedPrice.price : 'N/A';
   // };
-  
+
   return (
     <View style={styles.container}>
       <StatusBar
@@ -115,23 +122,23 @@ const DetailsScreen = ({navigation, route}) => {
       >
 
         <View style={styles.body}>
-          <View style={{ flexDirection: 'row'}}>
+          <View style={{ flexDirection: 'row' }}>
 
             <View>
 
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
-                <Text style={{color: 'white',fontSize: 20, fontWeight: 'bold' , marginLeft: 20, marginTop: 20}}>{title}</Text>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', marginLeft: 20, marginTop: 20 }}>{title}</Text>
 
 
                 <Image
                   source={require('../img/coffee1.png')}
 
-                  style={{ width: 35, height: 35, borderRadius: 10, marginLeft: 90, marginTop: 10,}}
+                  style={{ width: 35, height: 35, borderRadius: 10, marginLeft: 90, marginTop: 10, }}
                 />
                 <Image
                   source={require('../img/milk1.png')}
 
-                  style={{ width: 25, height: 30, borderRadius: 10, marginTop: 10,marginLeft: 20, }}
+                  style={{ width: 25, height: 30, borderRadius: 10, marginTop: 10, marginLeft: 20, }}
                 />
               </View>
 
@@ -152,34 +159,24 @@ const DetailsScreen = ({navigation, route}) => {
             </View>
           </View>
 
-          <View style={{ backgroundColor: 'black', padding: 20 }}>
+          <ScrollView contentContainerStyle={{ backgroundColor: 'black', padding: 20 }}>
 
             <Text style={{ color: 'white', fontSize: 20, fontWeight: 'normal' }}>Description</Text>
             <Text style={styles.tripInfo}>{description}</Text>
-              <Text style={{ color: 'white', fontSize: 16, fontWeight: 'normal', marginTop: 15 }}>Size</Text>
-              <View style = {{flexDirection: 'row', justifyContent: 'space-around'}}>
-                
-                <TouchableOpacity
-                onPress={() => handleSizeSelection('S')}
-                style = {{padding: 7, width: '20%', borderRadius: 10, marginTop: 10, borderColor: size === 'S' ? 'orange' : 'gray' , borderWidth: 2}}
+            <Text style={{ color: 'white', fontSize: 16, fontWeight: 'normal', marginTop: 15 }}>Size</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-around' , flex: 1}}>
+              {giaSP.map(item => {
+               return <TouchableOpacity
+               key={item.size}
+                  onPress={() => handleSizeSelection(item)}
+                  style={{ padding: 7, width: '20%', borderRadius: 10, marginTop: 10, borderColor: size === item.size ? 'orange' : 'gray', borderWidth: 2 }}
                 >
-                  <Text style = {{color: 'white', textAlign: 'center'}}>S</Text>
+                  <Text style={{ color: 'white', textAlign: 'center' }}>{item.size}</Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                onPress={() => handleSizeSelection('M')}
-                style = {{padding: 7, width: '20%', borderRadius: 10, marginTop: 10, borderColor: size === 'M' ? 'orange' : 'gray' , borderWidth: 2}}
-                >
-                  <Text style = {{color: 'white', textAlign: 'center'}}>M</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                onPress={() =>handleSizeSelection('L')}
-                style = {{padding: 7, width: '20%', borderRadius: 10, marginTop: 10, borderColor: size === 'L' ? 'orange' : 'gray', borderWidth: 2}}
-                >
-                  <Text style = {{color: 'white', textAlign: 'center'}}>L</Text>
-                </TouchableOpacity>
-              </View>
-          </View>
-          
+              })}
+            </View>
+          </ScrollView>
+
           <View style={styles.footer}>
 
             <View style={{ flexDirection: 'row' }}>
@@ -194,24 +191,24 @@ const DetailsScreen = ({navigation, route}) => {
               </TouchableOpacity>
             </View>
 
-            
-            <TouchableOpacity 
-            onPress={() => handleLikePress(route.params.id)}
-            style={styles.heartIcon}>
+
+            <TouchableOpacity
+              onPress={() => handleLikePress(route.params.id)}
+              style={styles.heartIcon}>
               {/* Icon trái tim */}
               <Image
-                 source={isLiked ? require('../img/heart1.png') : require('../img/heart.png')}
+                source={isLiked ? require('../img/heart1.png') : require('../img/heart.png')}
                 style={{ width: 30, height: 30 }}
               />
             </TouchableOpacity>
 
-            <TouchableOpacity 
-            onPress={() => navigation.goBack()}
-            style={styles.back}>
-  
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={styles.back}>
+
               <Image
                 source={require('../img/back1.png')}
-                style={{ width: 20, height: 20}}
+                style={{ width: 20, height: 20 }}
               />
             </TouchableOpacity>
           </View>
@@ -307,13 +304,13 @@ const styles = StyleSheet.create({
   heartIcon: {
     position: 'absolute',
     right: 16,
-    bottom: 750,
+    bottom: 730,
 
   },
   back: {
     position: 'absolute',
     left: 16,
-    bottom: 760,
+    bottom: 740,
 
   },
 })

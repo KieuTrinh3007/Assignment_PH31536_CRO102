@@ -1,6 +1,7 @@
 import { ScrollView, StyleSheet, Text, View, TouchableOpacity, Image, TextInput, KeyboardAvoidingView } from 'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { URL } from './HomeScreen';
 
 const ContactScreen = ({ navigation }) => {
 
@@ -45,7 +46,7 @@ const ContactScreen = ({ navigation }) => {
             seterrors(showErrors && errors)
             console.log(errors);
         } else {
-            const response = await fetch("http://192.168.1.50:3000/contacts", {
+            const response = await fetch(`${URL}/contacts`, {
                 method: 'POST',
                 body: JSON.stringify({
                     id: Date.now() + Math.random(),

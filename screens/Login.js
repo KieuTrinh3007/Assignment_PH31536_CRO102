@@ -1,6 +1,7 @@
 import { Image, ScrollView, StyleSheet, Text, TextInput, View, Button, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Alert } from 'react-native'
 import React, { useState } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { URL } from './HomeScreen';
 
 
 
@@ -31,7 +32,7 @@ const Login = (props) => {
         } else {
            
                 // thực hiện fetch lấy dữ liệu về
-                let url_check_login = "http://192.168.1.50:3000/users?email=" + email;
+                let url_check_login = `${URL}/users?email=` + email;
                 fetch(url_check_login)
                     .then((res) => { return res.json(); })
                     .then(async (res_login) => {

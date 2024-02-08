@@ -1,5 +1,6 @@
 import { Image, ScrollView, StyleSheet, Text, TextInput, View, CheckBox, Button, TouchableOpacity, SafeAreaView, KeyboardAvoidingView } from 'react-native'
 import React, { useState } from 'react'
+import { URL } from './HomeScreen';
 
 const Register = ({ navigation }) => {
 
@@ -58,7 +59,7 @@ const Register = ({ navigation }) => {
             seterrors(showErrors && errors)
             console.log(errors);
         } else {
-            const response = await fetch("http://192.168.1.50:3000/users", {
+            const response = await fetch(`${URL}/users`, {
                 method: 'POST',
                 body: JSON.stringify({
                     id: Date.now() + Math.random(),

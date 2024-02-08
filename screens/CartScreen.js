@@ -1,7 +1,9 @@
 import { StyleSheet, Text, View, TextInput, Image, Picker, SafeAreaView, ScrollView, TouchableOpacity, Button,FlatList} from 'react-native'
 import React, {useEffect, useState} from 'react'
+import { URL } from './HomeScreen';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import HomeScreen from './HomeScreen';
 
 
 
@@ -12,7 +14,7 @@ const CartScreen = ({navigation}) => {
   useEffect(() => {
     // Fetch dữ liệu từ API ở đây
     // Ví dụ sử dụng fetch:
-    fetch('http://192.168.1.50:3000/products')
+    fetch(`${URL}/products`)
         .then((response) => response.json())
         .then((data) => {
             // Kiểm tra xem data có tồn tại và có thuộc tính products không

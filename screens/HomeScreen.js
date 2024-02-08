@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, FlatList, Image, TouchableOpacity, ImageBackground, ScrollView, Alert, TextInput, ToastAndroid } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+export const URL = 'http://192.168.4.115:3000';
+
 
 const HomeScreen = ({ navigation }) => {
 
@@ -16,7 +18,7 @@ const HomeScreen = ({ navigation }) => {
     useEffect(() => {
         // Fetch dữ liệu từ API ở đây
         // Ví dụ sử dụng fetch:
-        fetch('http://192.168.1.50:3000/products')
+        fetch(`${URL}/products`)
             .then((response) => response.json())
             .then((data) => {
                 // Kiểm tra xem data có tồn tại và có thuộc tính products không
@@ -69,7 +71,7 @@ const HomeScreen = ({ navigation }) => {
     }
 
     const addCart = async () => {
-        const response = await fetch("http://192.168.1.50:3000/users", {
+        const response = await fetch(URL+"/users", {
             method: 'POST',
             body: JSON.stringify({
                 id: Date.now() + Math.random(),
@@ -183,7 +185,7 @@ const HomeScreen = ({ navigation }) => {
                                                     const priceS = item.giaSP.find(price => price.size === 'S' || price.size === '25'); 
                                                     const price = priceS ? priceS.price + ' ' + priceS.currency : 'N/A'
                                                    
-                                                    navigation.navigate("DetailsScreen", { image: item.linkAnh, title: item.tenSP, price:price, gia: item.giaSP, rate: item.danhGia, description: item.moTa })
+                                                    navigation.navigate("DetailsScreen", {id: item.id, giaSP: item.giaSP,image: item.linkAnh, title: item.tenSP, price:price, gia: item.giaSP, rate: item.danhGia, description: item.moTa })
                                                 }}
                                             >
                                                 <Image
