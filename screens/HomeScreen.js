@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, FlatList, Image, TouchableOpacity, ImageBackground, ScrollView, Alert, TextInput, ToastAndroid } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export const URL = 'http://192.168.1.50:3000';
+export const URL = 'http://192.168.0.119:3000';
 
 
 const HomeScreen = ({ navigation }) => {
@@ -64,17 +64,31 @@ const HomeScreen = ({ navigation }) => {
         }
     }
 
-    const addCart = async (productSize) => {
-        const response = await fetch(URL + "/products", {
-            method: 'POST',
-            body: JSON.stringify({
-               'size': productSize
-            }),
+    const addCart = async (item) => {
+        const responseCart = await fetch(URL+"/carts");
+        const dataCart = await responseCart.json();
+        const cart = dataCart.find(element => element.idSP == item.id);
+        let method = 'POST';
+        let url = URL + "/carts";
+        let body = {
+            idSP: item.id,
+            data: {"S": "1", "250gm": "1"}
+        }
+        if(cart){
+            url = URL + "/carts/"+cart.id;
+            method = 'PATCH';
+            body = {
+                idSP: item.id,
+                data: {"S": Number(cart.data['S'])+ 1 +"", "250gm": Number(cart.data['250gm'])+ 1+""}
+            }
+        }
+        const response = await fetch(url, {
+            method,
+            body: JSON.stringify(body),
             headers: {
                 'Content-type': 'application/json; charset=UTF-8',
             },
         })
-        console.log("aaa",response);
     }
 
     return (
@@ -170,7 +184,7 @@ const HomeScreen = ({ navigation }) => {
                                                     const priceS = item.giaSP.find(price => price.size === 'S' || price.size === '250gm');
                                                     const price = priceS ? priceS.price + ' ' + priceS.currency : 'N/A'
 
-                                                    navigation.navigate("DetailsScreen", { id: item.id, giaSP: item.giaSP, image: item.linkAnh, title: item.tenSP, price: price, gia: item.giaSP, rate: item.danhGia, description: item.moTa })
+                                                    navigation.navigate("DetailsScreen", { item,id: item.id, giaSP: item.giaSP, image: item.linkAnh, title: item.tenSP, price: price, gia: item.giaSP, rate: item.danhGia, description: item.moTa })
                                                 }}
                                             >
                                                 <Image
@@ -194,7 +208,7 @@ const HomeScreen = ({ navigation }) => {
 
                                                 <TouchableOpacity
                                                     style={styles.buttonadd}
-                                                    onPress={() => addCart(item.giaSP)}>
+                                                    onPress={() => addCart(item)}>
                                                     <Image
                                                         style={styles.imgadd}
                                                         source={require('../img/add.png')} />

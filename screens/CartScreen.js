@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View, TextInput, Image, SafeAreaView,TouchableOpacity,FlatList } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { useFocusEffect } from '@react-navigation/native';
 import { URL } from './HomeScreen';
 
 
@@ -9,37 +10,44 @@ import { URL } from './HomeScreen';
 const CartScreen = ({ navigation, route }) => {
 
   const [cart, setCart] = useState([]);
-  const [quantity, setQuantity] = useState('1');
+  const refCart = useRef(null)
 
-  const tangQuatity = (quantity) => {
-    let tang = parseInt(quantity) + 1;
-    setQuantity(tang.toString());
+  const getData = async () => {
+    const response = await fetch(`${URL}/carts`);
+    const cartData = await response.json();
+    const resopnseProduct =  await fetch(`${URL}/products`);
+    const listProduct = await resopnseProduct.json();
+    const listCard = [];
+    for (let i = 0; i < cartData.length; i++) {
+      const product = listProduct.find(item => item.id == cartData[i].idSP)
+     if(product){
+      listCard.push({...product, ...cartData[i]})
+     }
+    }
+    setCart(listCard);
   }
-
-  const giamQuatity = (quantity) => {
-    let giam = parseInt(quantity) - 1;
-    setQuantity(giam.toString());
-  }
-
 
   useEffect(() => {
-    if (cart.length === 0){
-    // Fetch dữ liệu từ API ở đây
-    // Ví dụ sử dụng fetch:
-    fetch(`${URL}/products`)
-      .then((response) => response.json())
-      .then((data) => {
-        // Kiểm tra xem data có tồn tại và có thuộc tính products không
-        if (data) {
-          setCart(data);
+refCart.current = cart
+  },[cart])
 
-        } else {
-          console.error('Dữ liệu không hợp lệ:', data);
+  useFocusEffect(
+    React.useCallback(() => {
+      getData();
+      return async () => {
+        for (let i = 0; i < refCart.current.length; i++) {
+          const element = refCart.current[i];
+          try {
+            const resopnse = await fetch(`${URL}/carts/${element.id}`, {method: 'PATCH', body: JSON.stringify({
+              data: element.data
+            })})
+          } catch (error) {
+            console.log('error ===', error)
+          }
         }
-      })
-      .catch((error) => console.error('Lỗi khi fetch dữ liệu:', error));
-    }
-  }, [cart]);
+      }
+    }, [])
+  );
 
   const removeFromCart = (productId) => {
     // Tạm thời để mô phỏng việc loại bỏ sản phẩm khỏi giỏ hàng
@@ -47,10 +55,18 @@ const CartScreen = ({ navigation, route }) => {
     setCart(updatedCart);
   };
 
- 
+ const totalPrice = useMemo(() => {
+  let total = 0;
+  for (let i = 0; i < cart.length; i++) {
+    const element = cart[i];
+     for (const value of element.giaSP) {
+      total += Number(element.data[value.size] || 0)* Number(value.price);
+     }
+  }
+  return total;
+ },[cart])
 
-
-  const CartCard = ({ item }) => {
+  const CartCard = ({ item, index }) => {
     const [selectedSize, setSelectedSize] = useState(null);
 
     const handleSizeSelection = (size) => {
@@ -67,7 +83,7 @@ const CartScreen = ({ navigation, route }) => {
 
               <Text style={{ fontWeight: 'bold', fontSize: 16, color: 'white', marginLeft: 20 }}>{item.tenSP}</Text>
               <Text style={{ fontSize: 13, color: 'gray', marginLeft: 20 }}>
-                With Milk
+                {item.loaiSP}
               </Text>
             </View>
           </View>
@@ -75,8 +91,8 @@ const CartScreen = ({ navigation, route }) => {
           <View>
 
             {item.giaSP && item.giaSP.map(option => {
-              return <Text
-                key={option.giaSP}
+              return (item.data[option.size] && Number(item.data[option.size])) ? <Text
+                key={option.size}
                 onPress={() => handleSizeSelection(option)}
 
               >
@@ -96,24 +112,33 @@ const CartScreen = ({ navigation, route }) => {
                   }}
                   >
                     {option.size}</Text>
-                  <Text style={{ color: 'white', marginTop: 15, marginHorizontal: 20, fontWeight: 'bold', fontSize: 20 }}> $ {option.price}</Text>
+                  <Text style={{ color: 'white', marginTop: 15, marginHorizontal: 20, fontWeight: 'bold', fontSize: 20 }}> $ { (Number(item.data[option.size])  * option.price).toFixed(2)}</Text>
                 </View>  
 
                   <View style={styles.click1}>
-                    <TouchableOpacity onPress={() =>{giamQuatity(quantity)}}>
+                    <TouchableOpacity onPress={() =>{
+                       cart[index].data[option.size] = String(Number(cart[index].data[option.size])-1);
+                       setCart([...cart])
+                    }}>
                       <Text style={styles.name}>-</Text>
                     </TouchableOpacity>
 
-                    <TextInput style={styles.name1} keyboardType='numeric' value= {quantity}  onChangeText={(value) => setQuantity(value)} />
+                    <TextInput style={styles.name1} keyboardType='numeric' value= {item.data[option.size]+""}  onChangeText={(value) => {
+                      cart[index].data[option.size] = value;
+                      setCart([...cart])
+                    }} />
 
 
-                    <TouchableOpacity onPress={() => {tangQuatity(quantity)}}>
+                    <TouchableOpacity onPress={() => {
+                      cart[index].data[option.size] = String(Number(cart[index].data[option.size])+ 1);
+                      setCart([...cart])
+                    }}>
                       <Text style={styles.name}>+</Text>
                     </TouchableOpacity>
                   </View>
                
 
-              </Text>
+              </Text> : null
 
             })}
 
@@ -149,16 +174,16 @@ const CartScreen = ({ navigation, route }) => {
 
       <FlatList 
         data={cart}
-        renderItem={({ item }) => <CartCard item={item} />}
+        renderItem={({ item, index }) => <CartCard key={item.id} item={item} index={index} />}
        
       />
 
-      <View style={{ flexDirection: 'row', position: 'absolute', top: 680, backgroundColor: 'black', width: '100%', height: 70, margin: 20 }}>
+      <View style={{ flexDirection: 'row', position: 'absolute', top: 630, backgroundColor: 'black', width: '100%', height: 70, margin: 20 }}>
         <View>
           <Text style={{ color: 'white', marginLeft: 10, marginTop: 10, fontSize: 15 }}>Total Price</Text>
-          <Text style={{ color: 'white', marginLeft: 10, fontSize: 25, fontWeight: 'bold' }}>$ 10.40</Text>
+          <Text style={{ color: 'white', marginLeft: 10, fontSize: 25, fontWeight: 'bold' }}>$ {totalPrice}</Text>
         </View>
-        <TouchableOpacity onPress={() => navigation.navigate("PaymentScreen")}
+        <TouchableOpacity onPress={() => navigation.navigate("PaymentScreen", {totalPrice, data: cart})}
           style={{ backgroundColor: "orange", width: '50%', justifyContent: 'center', alignItems: 'center', marginLeft: 80, margin: 10, borderRadius: 15 }}>
           <Text style={{ color: 'white', textAlign: 'center', fontSize: 20, fontWeight: 'bold' }}>Pay</Text>
         </TouchableOpacity>

@@ -5,7 +5,7 @@ import { URL } from './HomeScreen';
 
 const DetailsScreen = ({ navigation, route }) => {
 
-  const { image, title, price, rate, description, giaSP } = route.params;
+  const { image, title, price, rate, description, giaSP, item } = route.params;
 
   // State để lưu trữ kích thước hiện tại của sản phẩm (S, M, L)
   const [size, setSize] = useState('S');
@@ -67,16 +67,31 @@ const DetailsScreen = ({ navigation, route }) => {
     }
   };
 
-  const addToCart = () => {
-    const existingProductIndex = cart.findIndex(item => item.id === route.params.id && item.selectedSize === size);
-    if (existingProductIndex !== -1) {
-      const updatedCart = [...cart];
-      updatedCart[existingProductIndex].quantity += 1;
-      setCart(updatedCart);
-      console.log("Thêm thành công");
-    } else {
-      setCart([...cart, { ...route.params, selectedSize: size, quantity: 1 }]);
-    }
+  const addToCart = async () => {
+      const responseCart = await fetch(URL+"/carts");
+      const dataCart = await responseCart.json();
+      const cart = dataCart.find(element => element.idSP == item.id);
+      let method = 'POST';
+      let url = URL + "/carts";
+      let body = {
+          idSP: item.id,
+          data: {[size]: "1"}
+      }
+      if(cart){
+          url = URL + "/carts/"+cart.id;
+          method = 'PATCH';
+          body = {
+              idSP: item.id,
+              data: {...cart.data,[size]: Number(cart.data[size] || 0)+ 1 +""}
+          }
+      }
+      const response = await fetch(url, {
+          method,
+          body: JSON.stringify(body),
+          headers: {
+              'Content-type': 'application/json; charset=UTF-8',
+          },
+      })
   };
 
 

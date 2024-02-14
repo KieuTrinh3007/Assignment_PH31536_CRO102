@@ -2,52 +2,62 @@ import { ScrollView, StyleSheet, Text, View, TouchableOpacity, Image, FlatList, 
 import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { URL } from './HomeScreen';
+import { useFocusEffect } from '@react-navigation/native';
+
 
 const OrderHistoryScreen = ({ navigation, route }) => {
 
-  const [cart, setCart] = useState([]);
+  const [listOrder, setListOrder] = useState([]);
 
-
-  useEffect(() => {
-    if (cart.length === 0) {
-      // Fetch dữ liệu từ API ở đây
-      // Ví dụ sử dụng fetch:
-      fetch(`${URL}/products`)
-        .then((response) => response.json())
-        .then((data) => {
-          // Kiểm tra xem data có tồn tại và có thuộc tính products không
-          if (data) {
-            setCart(data);
-
-          } else {
-            console.error('Dữ liệu không hợp lệ:', data);
-          }
-        })
-        .catch((error) => console.error('Lỗi khi fetch dữ liệu:', error));
+  const getData = async() => {
+    const responseOrder = await fetch(`${URL}/orders`);
+    const dataOrder = await responseOrder.json();
+    const resopnseProduct =  await fetch(`${URL}/products`);
+    const listProduct = await resopnseProduct.json();
+    const listOrder = [];
+    for (let i = 0; i < dataOrder.length; i++) {
+      const product = listProduct.find(item => item.id == dataOrder[i].idSP)
+     if(product){
+      listOrder.push({...product, ...dataOrder[i]})
+     }
     }
-  }, [cart]);
 
-  const CartCard = ({ item }) => {
+    setListOrder(listOrder.sort((a,b) => a.createAt - b.createAt));
+  }
+
+
+  useFocusEffect(
+    React.useCallback(() => {
+      getData();
+    }, [])
+  );
+
+  const CartCard = ({ item, index }) => {
     const [selectedSize, setSelectedSize] = useState(null);
 
     const handleSizeSelection = (size) => {
       setSelectedSize(size);
     };
+
+    const createAt = new Date(Number(item.createAt));
+
     return (
       <View>
 
         <View>
+        {new Date(listOrder[index-1]?.createAt || '0').toDateString() != new Date(listOrder[index].createAt).toDateString() ? 
           <View style = {{flexDirection: 'row', justifyContent: 'space-between', margin: 20}}>
+            
             <View>
             <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 20 }}>Order Date</Text>
-            <Text style={{ color: 'white', fontSize: 16, top: 5, }}>20 March 16:20</Text>
-            </View>
+            <Text style={{ color: 'white', fontSize: 16, top: 5, }}>{createAt.getDate()+"/"+(createAt.getMonth()+1)+"/"+createAt.getFullYear()}</Text>
+            </View> 
             <View>
             <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 20 }}>Total Amount</Text>
             <Text style={{ color: 'orange',  fontSize: 16, top: 5, left: 50 }}>$ 74.40</Text>
 
-            </View>
-          </View>
+            </View> 
+          </View> : null }
          
           <View style={styles.cartCard}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -56,17 +66,17 @@ const OrderHistoryScreen = ({ navigation, route }) => {
 
                 <Text style={{ fontWeight: 'bold', fontSize: 16, color: 'white', marginLeft: 5 }}>{item.tenSP}</Text>
                 <Text style={{ fontSize: 14, color: 'gray', marginLeft: 5 }}>
-                  With Milk
+                  {item.loaiSP}
                 </Text>
               </View>
               <Text style={{ color: 'orange', fontWeight: 'bold', fontSize: 25, bottom: 10, marginLeft: 10, top: 15 }}>$</Text>
-              <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 25, bottom: 10, marginLeft: 5, top: 15 }}>8.40</Text>
+              <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 25, bottom: 10, marginLeft: 5, top: 15 }}>{item.totalPrice}</Text>
             </View>
 
             <View>
 
               {item.giaSP && item.giaSP.map(option => {
-                return <Text
+                return (item.data[option.size] && Number(item.data[option.size])) ? <Text
                   key={option.giaSP}
                   onPress={() => handleSizeSelection(option)}
 
@@ -92,12 +102,12 @@ const OrderHistoryScreen = ({ navigation, route }) => {
 
                   <View style={styles.click1}>
                     <Text style={{ color: 'orange', fontWeight: 'bold', fontSize: 19, bottom: 10, marginLeft: 40 }}>X</Text>
-                    <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18, bottom: 10 }}>2</Text>
-                    <Text style={{ color: 'orange', fontWeight: 'bold', fontSize: 19, bottom: 10, marginLeft: 100 }}>8.40</Text>
+                    <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18, bottom: 10 }}>{item.data[option.size]}</Text>
+                    <Text style={{ color: 'orange', fontWeight: 'bold', fontSize: 19, bottom: 10, marginLeft: 100 }}>{Number(item.data[option.size]) * option.price}</Text>
                   </View>
 
 
-                </Text>
+                </Text> : null
 
               })}
 
@@ -134,8 +144,8 @@ const OrderHistoryScreen = ({ navigation, route }) => {
       </View>
 
       <FlatList
-        data={cart}
-        renderItem={({ item }) => <CartCard item={item} />}
+        data={listOrder}
+        renderItem={({ item, index }) => <CartCard key={item.id} index={index} item={item} />}
       />
 
     </SafeAreaView>

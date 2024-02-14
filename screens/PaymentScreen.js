@@ -1,7 +1,42 @@
 import { SafeAreaView, StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
+import { URL } from './HomeScreen';
 
-const PaymentScreen = ({navigation}) => {
+const PaymentScreen = ({route,navigation}) => {
+  const {totalPrice, data} = route.params;
+
+  const onPayment = async () => {
+    const resopnseCart = await fetch(`${URL}/carts`);
+    const dataCart = await resopnseCart.json();
+    const listIdCart = dataCart.map(item => item.id);
+    if(listIdCart.length){
+      for (let i = 0; i < listIdCart.length; i++) {
+        const id = listIdCart[i];
+        await fetch(`${URL}/carts/${id}`, {method: 'DELETE'})
+      }
+    }
+    for (let i = 0; i < data.length; i++) {
+      const element = data[i];
+      let totalPrice = 0;
+      for (let j = 0; j < element.giaSP.length; j++) {
+        const {price, size} = element.giaSP[j];
+        totalPrice += (Number(price) * (element.data[size] || 0))
+      }
+      await fetch(`${URL}/orders`, {
+        method: 'POST',
+        body: JSON.stringify({
+          idSP: element.idSP,
+          createAt: Date.now()+"",
+          data: element.data,
+          totalPrice
+        })
+      })
+    }
+   
+  }
+
+
+
   return (
    <SafeAreaView style={{ backgroundColor: "black", ...StyleSheet.absoluteFillObject }}>
 
@@ -101,12 +136,15 @@ const PaymentScreen = ({navigation}) => {
         </View>
       </View>
 
-      <View style = {{flexDirection: 'row', position: 'absolute', top: 750, backgroundColor: 'black', width: '100%', height: 70}}>
+      <View style = {{flexDirection: 'row', position: 'absolute', top: 650, backgroundColor: 'black', width: '100%', height: 70}}>
         <View>
         <Text style = {{color: 'white', marginLeft: 10,marginTop: 10, fontSize: 15}}>Total Price</Text>
-        <Text style = {{color: 'white', marginLeft: 10, fontSize: 25, fontWeight: 'bold'}}>$ 4.20</Text>
+        <Text style = {{color: 'white', marginLeft: 10, fontSize: 25, fontWeight: 'bold'}}>$ {totalPrice}</Text>
       </View>
-      <TouchableOpacity onPress={() => navigation.navigate('OrderHistoryScreen')}
+      <TouchableOpacity onPress={ async() => {
+        await onPayment();
+        navigation.navigate('OrderHistoryScreen')
+      }}
       style = {{backgroundColor: "orange", width: '55%',justifyContent: 'center', alignItems: 'center', marginLeft: 80, margin: 10, borderRadius: 15}}>
           <Text style = {{color: 'white', textAlign: 'center', fontSize: 19,fontWeight: 'bold'}}>Pay from Credit Card</Text>
       </TouchableOpacity>
