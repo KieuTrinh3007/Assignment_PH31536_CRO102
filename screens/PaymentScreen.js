@@ -22,6 +22,83 @@ const PaymentScreen = ({navigation}) => {
           </View>
 
         </View>
+
+        <View style = {{borderRadius: 10, borderColor: 'orange', borderWidth: 1, margin: 10, paddingVertical: 10}}>
+          <Text style = {{color: 'white', marginHorizontal: 10, fontWeight: 'bold', marginBottom: 10}}>Credit Card</Text>
+          <View style = {{borderRadius: 20, backgroundColor: '#262B33' ,borderWidth: 1, marginHorizontal: 10,height: 200}}>
+            <View style = {{flexDirection: 'row', justifyContent: 'space-between'}}>
+              <Image
+              source={require('../img/chip.png')}
+              style = {{margin: 15}}
+              />
+               <Image
+              source={require('../img/visa.png')}
+              style = {{margin: 10, height: 15, width: 50}}
+              />
+
+            </View>
+           
+            <Text style = {{color: 'white',  fontWeight: 'bold', fontSize: 18 , marginTop: 30, marginLeft: 5}}> 3 0 0 7   2 0 0 4    1 4 0 6    2 0 0 4 </Text>
+           
+            
+            <View style = {{flexDirection: 'row', justifyContent: 'space-between', margin: 5}}>
+            <Text style = {{color: 'gray',marginTop: 30}}> Card Holder Name </Text>
+            <Text style = {{color: 'gray',marginTop: 30}}> Expiry Date</Text>
+            </View>
+           
+            <View style = {{flexDirection: 'row', justifyContent: 'space-between', margin: 5}}>
+            <Text style = {{color: 'white', fontWeight: 'bold', fontSize: 18,}}> Rine </Text>
+            <Text style = {{color: 'white', fontWeight: 'bold', fontSize: 18,}}> 02/30 </Text>
+
+            </View>
+          </View>
+
+        </View>
+
+        <View style = {styles.khung}>
+          <View style = {styles.press}>
+            <Image
+            source={require('../img/wallet.png')}
+            />
+            <Text style = {styles.textPayment}>Wallet</Text>
+            <Text style = {{marginLeft: 230, color: 'white', fontSize: 15}}>$ 100.50</Text>
+
+          </View>
+
+        </View>
+
+        <View style = {styles.khung}>
+          <View style = {styles.press}>
+            <Image
+            source={require('../img/ggpay.png')}
+            />
+            <Text style = {styles.textPayment}>Google Payt</Text>
+
+          </View>
+
+        </View>
+
+        <View style = {styles.khung}>
+          <View style = {styles.press}>
+            <Image
+            source={require('../img/applepay.png')}
+            />
+            <Text style = {styles.textPayment}>Apple Pay</Text>
+
+          </View>
+
+        </View>
+
+        <View style = {styles.khung}>
+          <View style = {styles.press}>
+            <Image
+            source={require('../img/amazonpay.png')}
+            />
+            <Text style = {styles.textPayment}>Amazon Pay</Text>
+
+          </View>
+
+        </View>
       </View>
 
       <View style = {{flexDirection: 'row', position: 'absolute', top: 750, backgroundColor: 'black', width: '100%', height: 70}}>
@@ -29,7 +106,7 @@ const PaymentScreen = ({navigation}) => {
         <Text style = {{color: 'white', marginLeft: 10,marginTop: 10, fontSize: 15}}>Total Price</Text>
         <Text style = {{color: 'white', marginLeft: 10, fontSize: 25, fontWeight: 'bold'}}>$ 4.20</Text>
       </View>
-      <TouchableOpacity onPress={() => {}}
+      <TouchableOpacity onPress={() => navigation.navigate('OrderHistoryScreen')}
       style = {{backgroundColor: "orange", width: '55%',justifyContent: 'center', alignItems: 'center', marginLeft: 80, margin: 10, borderRadius: 15}}>
           <Text style = {{color: 'white', textAlign: 'center', fontSize: 19,fontWeight: 'bold'}}>Pay from Credit Card</Text>
       </TouchableOpacity>
@@ -43,7 +120,8 @@ export default PaymentScreen
 const styles = StyleSheet.create({
   headerBar: {
     flexDirection: 'row',
-    alignItems: 'center'
+    alignItems: 'center',
+    marginBottom: 20,
   },
   cart: {
     fontWeight: 'bold',
@@ -52,5 +130,28 @@ const styles = StyleSheet.create({
     top: 10,
     color: "white",
   },
+  khung: {
+    borderColor: 'gray',
+    borderWidth: 0.5,
+    borderRadius: 30,
+    marginHorizontal: 10,
+    backgroundColor: 'black',
+    marginTop: 10,
+  },
+  press:{
+    flexDirection: 'row',
+    padding: 10,
+    top: 3,
+    left: 10,
+   
+  
+  },
+  textPayment: {
+    color: 'white',
+    marginLeft: 10,
+    fontWeight: 'bold',
+    fontSize: 18,
+    bottom: 5
+  }
   
 })

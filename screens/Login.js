@@ -1,4 +1,4 @@
-import { Image, ScrollView, StyleSheet, Text, TextInput, View, Button, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Alert } from 'react-native'
+import { Image, ScrollView, StyleSheet, Text, TextInput, View,TouchableOpacity, SafeAreaView, KeyboardAvoidingView } from 'react-native'
 import React, { useState } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { URL } from './HomeScreen';
@@ -11,7 +11,7 @@ const Login = (props) => {
     const [password, setpassword] = useState('nhokgl9x');
     const [showPassword, setShowPassword] = useState(false);
     const [errors, seterrors] = useState({});
-
+    const [username, setUsername] = useState('');
 
 
     const toggleShowPassword = () => {
@@ -37,25 +37,24 @@ const Login = (props) => {
                     .then((res) => { return res.json(); })
                     .then(async (res_login) => {
                         if (res_login.length != 1) {
-                            // seterrors('Invalid email.');
                             seterrors({ email: 'Email không tồn tại' });
                         } else {
                             let objU = res_login[0];
                             if (objU.password !== password) {
-                              
-                                // seterrors('Invalid password.');
                                 seterrors({ password: 'Mật khẩu không đúng' });
                                 return;
                             } else {
                                 try {
                                     const jsonString = JSON.stringify(objU);
                                     await AsyncStorage.setItem('loginInfo', jsonString);
+                                    await AsyncStorage.setItem('username', objU.username); // Lưu username vào AsyncStorage
+                                    await AsyncStorage.setItem('email', email);
+                                    console.log(username);
                                     seterrors({});
-                                    // setshowErrors(false);
                                     console.log('Đăng nhập thành công');
-                                    props.navigation.navigate('DrawerNavigator')
+                                    props.navigation.navigate('DrawerNavigator');
+                                  
                                 } catch (e) {
-                                    // saving error
                                     console.log(e);
                                 }
                             }
@@ -79,7 +78,6 @@ const Login = (props) => {
             } else if (!email.includes('@') || !email.includes('.')){
                 errors.email = "Email không hợp lệ";
             }
-            // !email.includes('@') || !email.includes('.com')
 
             if (!password) {
                 errors.password = "Vui lòng nhập Password"

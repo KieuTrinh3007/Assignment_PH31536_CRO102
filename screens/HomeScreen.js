@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, FlatList, Image, TouchableOpacity, ImageBackground, ScrollView, Alert, TextInput, ToastAndroid } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export const URL = 'http://192.168.4.115:3000';
+export const URL = 'http://192.168.1.50:3000';
 
 
 const HomeScreen = ({ navigation }) => {
@@ -13,7 +13,7 @@ const HomeScreen = ({ navigation }) => {
     const [danhSach, setDanhSach] = useState([]);
     const [initData, setInitData] = useState([]);
 
-  
+
 
     useEffect(() => {
         // Fetch dữ liệu từ API ở đây
@@ -31,10 +31,7 @@ const HomeScreen = ({ navigation }) => {
             })
             .catch((error) => console.error('Lỗi khi fetch dữ liệu:', error));
     }, []);
-    const formatPrice = (price) => {
-        // Sử dụng hàm toLocaleString để định dạng số và thêm dấu chấm ngăn cách hàng nghìn
-        return price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
-    };
+
 
 
     const handleSection = (index) => {
@@ -50,16 +47,13 @@ const HomeScreen = ({ navigation }) => {
     };
 
     const filteredProducts = () => initData.filter((product) => {
-        if (product.tenSP.toLowerCase().includes(search.toLowerCase()) || product.loaiSP.toLowerCase().includes(search.toLowerCase())) {
+        if (product.tenSP && product.loaiSP && (product.tenSP.toLowerCase().includes(search.toLowerCase()) || product.loaiSP.toLowerCase().includes(search.toLowerCase()))) {
             return product;
         }
         return false;
     });
 
-    const getPriceForSize = (product, selectedSize) => {
-        const selectedPrice = product.giaSP.find(item => item.size === selectedSize);
-        return selectedPrice ? `${selectedPrice.currency} ${selectedPrice.price}` : 'N/A';
-      };
+
 
     const handleSearch = (value) => {
         setsearch(value);
@@ -70,19 +64,17 @@ const HomeScreen = ({ navigation }) => {
         }
     }
 
-    const addCart = async () => {
-        const response = await fetch(URL+"/users", {
+    const addCart = async (productSize) => {
+        const response = await fetch(URL + "/products", {
             method: 'POST',
             body: JSON.stringify({
-                id: Date.now() + Math.random(),
-                username: username,
-                email: email,
-                password: password,
+               'size': productSize
             }),
             headers: {
                 'Content-type': 'application/json; charset=UTF-8',
             },
         })
+        console.log("aaa",response);
     }
 
     return (
@@ -138,10 +130,6 @@ const HomeScreen = ({ navigation }) => {
 
             </View>
 
-
-
-
-
             <View style={styles.menu}>
                 <ScrollView
                     horizontal={true}>
@@ -157,9 +145,6 @@ const HomeScreen = ({ navigation }) => {
                     ))}
                 </ScrollView>
             </View>
-
-
-
 
             <ScrollView>
                 {section.filter(item => !item.hide)
@@ -182,10 +167,10 @@ const HomeScreen = ({ navigation }) => {
                                             <TouchableOpacity
 
                                                 onPress={() => {
-                                                    const priceS = item.giaSP.find(price => price.size === 'S' || price.size === '25'); 
+                                                    const priceS = item.giaSP.find(price => price.size === 'S' || price.size === '250gm');
                                                     const price = priceS ? priceS.price + ' ' + priceS.currency : 'N/A'
-                                                   
-                                                    navigation.navigate("DetailsScreen", {id: item.id, giaSP: item.giaSP,image: item.linkAnh, title: item.tenSP, price:price, gia: item.giaSP, rate: item.danhGia, description: item.moTa })
+
+                                                    navigation.navigate("DetailsScreen", { id: item.id, giaSP: item.giaSP, image: item.linkAnh, title: item.tenSP, price: price, gia: item.giaSP, rate: item.danhGia, description: item.moTa })
                                                 }}
                                             >
                                                 <Image
@@ -200,16 +185,16 @@ const HomeScreen = ({ navigation }) => {
                                                     {item.giaSP.map((price) => (
                                                         price.size === 'S' || price.size === '250gm' ? (
                                                             <Text style={{ color: 'white', fontSize: 16, marginTop: 5, fontWeight: 'bold' }}>
-                                                               {price.currency} {price.price}
+                                                                {price.currency} {price.price}
                                                             </Text>
                                                         ) : null
                                                     ))}
-                                                    
+
                                                 </View>
 
                                                 <TouchableOpacity
                                                     style={styles.buttonadd}
-                                                    onPress={() => Alert.alert('Thêm vào giỏ hàng thành công')}>
+                                                    onPress={() => addCart(item.giaSP)}>
                                                     <Image
                                                         style={styles.imgadd}
                                                         source={require('../img/add.png')} />

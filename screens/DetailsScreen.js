@@ -1,7 +1,5 @@
 import { StyleSheet, Text, View, StatusBar, ImageBackground, Image, TouchableOpacity, Pressable, ScrollView } from 'react-native'
 import React, { useState, useEffect } from 'react'
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { produce } from 'immer';
 import { URL } from './HomeScreen';
 
 
@@ -16,6 +14,10 @@ const DetailsScreen = ({ navigation, route }) => {
 
   const [isLiked, setIsLiked] = useState(false);
 
+  const [currentPrice, setCurrentPrice] = useState(price);
+
+  const [cart, setCart] = useState([]);
+
   useEffect(() => {
     // Kiểm tra xem sản phẩm có trong danh sách yêu thích hay không
     checkIsLiked();
@@ -25,7 +27,7 @@ const DetailsScreen = ({ navigation, route }) => {
     try {
       const response = await fetch(`${URL}/favorites?id=${route.params.id}`);
       const result = await response.json();
-      if(result?.length){
+      if (result?.length) {
         setIsLiked(true)
       }
     } catch (error) {
@@ -34,81 +36,49 @@ const DetailsScreen = ({ navigation, route }) => {
   };
 
   const handleLikePress = async (productId) => {
-    if(isLiked){
-      const response = await fetch(`${URL}/favorites/${route.params.id}`, {method: 'DELETE'});
-    const result = await response.json();
+    if (isLiked) {
+      const response = await fetch(`${URL}/favorites/${route.params.id}`, { method: 'DELETE' });
+
 
     } else {
       const response = await fetch(`${URL}/favorites`, {
         method: 'POST',
         headers: {
-           'Content-Type': 'application/json',
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({'id': productId}),
-    });
-    const result = await response.json();
+        body: JSON.stringify({ 'id': productId }),
+      });
+
     }
     setIsLiked(!isLiked)
-    // setIsLiked(favorites.includes(productId));
-   
-    // try {
-    //   // Lấy danh sách sản phẩm đã được yêu thích từ AsyncStorage
-    //   const favoritesData = await AsyncStorage.getItem('favorites');
-    //   let favorites = [];
 
-    //   if (favoritesData) {
-    //     favorites = JSON.parse(favoritesData);
-    //   }
-
-    //   // Thêm hoặc xóa sản phẩm khỏi danh sách yêu thích tùy thuộc vào trạng thái trước đó
-    //   const isProductLiked = favorites.includes(productId);
-    //   // if (isProductLiked) {
-    //   //   // Nếu sản phẩm đã yêu thích, loại bỏ nó khỏi danh sách
-    //   //   const updatedFavorites = favorites.filter(item => item !== route.params.id);
-    //   //   await AsyncStorage.setItem('favorites', JSON.stringify(updatedFavorites));
-    //   //   setIsLiked(false); 
-    //   // } else {
-    //   //   // Nếu sản phẩm chưa yêu thích, thêm nó vào danh sách
-    //   //   favorites.push(productId);
-    //   //   await AsyncStorage.setItem('favorites', JSON.stringify(favorites));
-    //   //   setIsLiked(true); 
-    //   // }
-    //   const updatedFavorites = produce(favorites, (draftFavorites) => {
-    //     if (isProductLiked) {
-    //       return draftFavorites.filter(item => item !== productId);
-    //     } else {
-    //       draftFavorites.push(productId);
-    //     }
-    //   });
-
-    //   await AsyncStorage.setItem('favorites', JSON.stringify(updatedFavorites));
-    //   setIsLiked(!isProductLiked);
-
-    // } catch (error) {
-    //   console.error('Lỗi khi lưu trạng thái yêu thích:', error);
-    // }
   };
 
 
-  const [currentPrice, setCurrentPrice] = useState(price);
+
 
   // Hàm để cập nhật kích thước khi người dùng chọn
   const handleSizeSelection = (data) => {
     setSize(data.size);
-    if(data.price){
+    if (data.price) {
       setCurrentPrice(data.price);
     } else {
       setCurrentPrice('N/A');
     }
   };
 
-  // Hàm để lấy giá của sản phẩm dựa trên kích thước hiện tại
-  // const getPriceForSize = () => {
-  //   // Lấy giá tương ứng với kích thước hiện tại từ mảng giá sản phẩm
-  //   const selectedPrice = price.find(item => item.size === size);
-  //   // Kiểm tra nếu tồn tại giá cho kích thước này thì trả về giá đó, ngược lại trả về 'N/A'
-  //   return selectedPrice ? selectedPrice.price : 'N/A';
-  // };
+  const addToCart = () => {
+    const existingProductIndex = cart.findIndex(item => item.id === route.params.id && item.selectedSize === size);
+    if (existingProductIndex !== -1) {
+      const updatedCart = [...cart];
+      updatedCart[existingProductIndex].quantity += 1;
+      setCart(updatedCart);
+      console.log("Thêm thành công");
+    } else {
+      setCart([...cart, { ...route.params, selectedSize: size, quantity: 1 }]);
+    }
+  };
+
 
   return (
     <View style={styles.container}>
@@ -164,10 +134,10 @@ const DetailsScreen = ({ navigation, route }) => {
             <Text style={{ color: 'white', fontSize: 20, fontWeight: 'normal' }}>Description</Text>
             <Text style={styles.tripInfo}>{description}</Text>
             <Text style={{ color: 'white', fontSize: 16, fontWeight: 'normal', marginTop: 15 }}>Size</Text>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-around' , flex: 1}}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-around', flex: 1 }}>
               {giaSP.map(item => {
-               return <TouchableOpacity
-               key={item.size}
+                return <TouchableOpacity
+                  key={item.size}
                   onPress={() => handleSizeSelection(item)}
                   style={{ padding: 7, width: '20%', borderRadius: 10, marginTop: 10, borderColor: size === item.size ? 'orange' : 'gray', borderWidth: 2 }}
                 >
@@ -183,10 +153,11 @@ const DetailsScreen = ({ navigation, route }) => {
 
               <View style={styles.price}>
                 <Text style={{ color: 'white' }}>Price</Text>
-                <Text style={styles.priceText}>{currentPrice}</Text>
+                <Text style={styles.priceText}>$ {currentPrice}</Text>
               </View>
 
-              <TouchableOpacity style={styles.bookButton}>
+              <TouchableOpacity onPress = {addToCart }
+              style={styles.bookButton}>
                 <Text style={styles.buttonText}>Add to Card</Text>
               </TouchableOpacity>
             </View>
@@ -253,8 +224,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.6)",
     marginTop: 370,
 
-
-
   },
   tripInfo: {
     fontSize: 15,
@@ -263,7 +232,6 @@ const styles = StyleSheet.create({
     color: 'white',
     marginTop: 10,
     height: 90,
-
 
   },
   footer: {

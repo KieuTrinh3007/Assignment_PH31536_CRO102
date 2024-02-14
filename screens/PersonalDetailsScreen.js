@@ -1,10 +1,13 @@
 import { StyleSheet, Text, View, SafeAreaView, Image, TouchableOpacity, TextInput } from 'react-native'
 import React, { useState, useEffect } from 'react'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { URL } from './HomeScreen';
 
 const PersonalDetailsScreen = ({ navigation, route }) => {
-    const [username, setusername] = useState('');
-    const [email, setemail] = useState('');
+    const initialUsername = route.params?.username || '';
+    const initialEmail = route.params?.email || '';
+    const [username, setusername] = useState(initialUsername);
+    const [email, setemail] = useState(initialEmail);
     const [password, setpassword] = useState('');
     const [repassword, setrepassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -21,12 +24,21 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
     const [errors, seterrors] = useState({});
 
     useEffect(() => {
-        if (route.params) {
-            const { username, email } = route.params;
-            setusername(username || '');
-            setemail(email || '');
-        }
-    }, [route.params]);
+        const getLoginInfo = async () => {
+            try {
+                const username = await AsyncStorage.getItem('username');
+                const email = await AsyncStorage.getItem('email');
+                if (username !== null && email !== null) {
+                    setusername(username);
+                    setemail(email);
+                }
+            } catch (e) {
+                console.log(e);
+            }
+        };
+
+        getLoginInfo();
+    }, []);
 
     const getErrors = (email, username, password, repassword) => {
         const errors = {};
@@ -79,13 +91,20 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
             })
 
             const result = await response.json();
-            if(result.id){
+            if (result.id) {
                 seterrors({});
                 setshowErrors(false);
                 console.log('Đăng ký thành công');
                 navigation.goBack();
             }
-           
+
+        }
+        try {
+            // Lưu thông tin đăng nhập vào AsyncStorage
+            await AsyncStorage.setItem('username', username);
+            await AsyncStorage.setItem('email', email);
+        } catch (e) {
+            console.log(e);
         }
 
     }
@@ -135,11 +154,11 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
 
                 />
 
-{errors.username && (
-                            <Text style={{ fontSize: 16, color: 'red', marginLeft: 20 }}>
-                                {errors.username}
-                            </Text>
-                        )}
+                {errors.username && (
+                    <Text style={{ fontSize: 16, color: 'red', marginLeft: 20 }}>
+                        {errors.username}
+                    </Text>
+                )}
 
                 <TextInput
                     style={styles.khung}
@@ -150,11 +169,11 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
 
 
                 />
-                 {errors.email && (
-                            <Text style={{ fontSize: 16, color: 'red', marginLeft: 20 }}>
-                                {errors.email}
-                            </Text>
-                        )}
+                {errors.email && (
+                    <Text style={{ fontSize: 16, color: 'red', marginLeft: 20 }}>
+                        {errors.email}
+                    </Text>
+                )}
 
                 <View>
                     <TextInput
@@ -166,11 +185,11 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
                         secureTextEntry={!showPassword}
 
                     />
-                     {errors.password && (
-                            <Text style={{ fontSize: 16, color: 'red', marginLeft: 20 }}>
-                                {errors.password}
-                            </Text>
-                        )}
+                    {errors.password && (
+                        <Text style={{ fontSize: 16, color: 'red', marginLeft: 20 }}>
+                            {errors.password}
+                        </Text>
+                    )}
 
                     <TouchableOpacity
                         onPress={toggleShowPassword}
@@ -190,21 +209,21 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
                         onChangeText={(txt) => { setrepassword(txt) }}
                         placeholder="Re-Password"
                         placeholderTextColor="gray"
-                        secureTextEntry={!showPassword}
+                        secureTextEntry={!showRePassword}
 
                     />
-                     {errors.repassword && (
-                            <Text style={{ fontSize: 16, color: 'red', marginLeft: 20 }}>
-                                {errors.repassword}
-                            </Text>
-                        )}
+                    {errors.repassword && (
+                        <Text style={{ fontSize: 16, color: 'red', marginLeft: 20 }}>
+                            {errors.repassword}
+                        </Text>
+                    )}
 
                     <TouchableOpacity
                         onPress={toggleShowRePassword}
                         style={{ position: 'absolute', right: 40, top: 40 }}
                     >
                         <Image
-                            source={showPassword ? require('../img/eye.png') : require('../img/eye1.png')}
+                            source={showRePassword ? require('../img/eye.png') : require('../img/eye1.png')}
                             style={{ width: 24, height: 24, tintColor: 'white' }}
                         />
                     </TouchableOpacity>

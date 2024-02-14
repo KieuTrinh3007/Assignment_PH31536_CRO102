@@ -35,30 +35,6 @@ const About = ({navigation}) => {
     )
 }
 
-
-const Payment = ({navigation}) => {
-    return(
-        <SafeAreaView style={{ backgroundColor: "black", ...StyleSheet.absoluteFillObject }}>
-        <View style={styles.headerBar}>
-               <TouchableOpacity onPress={() => navigation.openDrawer()}>
-                   <View>
-                       <Image
-                           source={require('../img/menu.png')}
-                           style={styles.image1}
-                           resizeMode="cover"
-                       />
-                   </View>
-               </TouchableOpacity>
-
-               <View>
-                   <Text style={styles.cart}>Payment</Text>
-               </View>
-
-           </View>
-        </SafeAreaView>
-    )
-}
-
 const MyDrawer = () => {
     return (
         <DrawerDEMO.Navigator initialRouteName="Home"
@@ -83,7 +59,6 @@ const MyDrawer = () => {
               }}>
             <DrawerDEMO.Screen name="Home" component={TabNavigator} options={{
             }}/>
-            <DrawerDEMO.Screen name="Payment Method" component={Payment} />
             <DrawerDEMO.Screen name="About" component={About} />
             <DrawerDEMO.Screen name="Contact" component={ContactScreen} />
         </DrawerDEMO.Navigator>

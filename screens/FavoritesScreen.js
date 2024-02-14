@@ -2,7 +2,6 @@ import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity } from 'rea
 import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { FlatList } from 'react-native-gesture-handler'
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { URL } from './HomeScreen';
 
@@ -10,7 +9,7 @@ import { URL } from './HomeScreen';
 
 const FavoritesScreen = ({ navigation }) => {
   const [favorites, setFavorites] = useState([]);
-  const [isLiked, setIsLiked] = useState(false);
+
 
   const getData = async () => {
     const response = await fetch(`${URL}/favorites`);
@@ -25,42 +24,8 @@ const FavoritesScreen = ({ navigation }) => {
     React.useCallback(() => {
       getData();
     }, [])
-  );
+  );    
 
-  // useEffect(() => {
-  //   // Fetch dữ liệu từ API ở đây
-  //   // Ví dụ sử dụng fetch:
-  //   getData();
-  //   // fetch(`${URL}/products`)
-  //   //   .then((response) => response.json())
-  //   //   .then((data) => {
-  //   //     // Kiểm tra xem data có tồn tại và có thuộc tính products không
-  //   //     if (data) {
-  //   //       setFavorites(data);
-          
-
-  //   //     } else {
-  //   //       console.error('Dữ liệu không hợp lệ:', data);
-  //   //     }
-  //   //   })
-  //   //   .catch((error) => console.error('Lỗi khi fetch dữ liệu:', error));
-  // }, []);
-
-  // useEffect(() => {
-  //   loadFavorites();
-  // }, []);
-
-  // const loadFavorites = async () => {
-  //   try {
-  //     const favoritesData = await AsyncStorage.getItem('favorites');
-  //     if (favoritesData) {
-  //       const favoritesArray = JSON.parse(favoritesData);
-  //       setFavorites(favoritesArray);
-  //     }
-  //   } catch (error) {
-  //     console.error('Lỗi khi tải danh sách yêu thích:', error);
-  //   }
-  // };
 
   const handleLikePress = async (itemId) => {
     const response = await fetch(`${URL}/favorites/${itemId}`, {method: 'DELETE'});
@@ -68,32 +33,7 @@ const FavoritesScreen = ({ navigation }) => {
     if(result){
       await getData()
     }
-    // try {
-    //   // Lấy danh sách sản phẩm đã được yêu thích từ AsyncStorage
-    //   const favoritesData = await AsyncStorage.getItem('favorites');
-    //   let favoritesArray = [];
-
-    //   if (favoritesData) {
-    //     favoritesArray = JSON.parse(favoritesData);
-    //   }
-
-    //   // Thêm hoặc xóa productId từ danh sách sản phẩm đã được yêu thích tùy thuộc vào trạng thái trước đó
-    //   if (favoritesArray.includes(productId)) {
-    //     // Nếu đã yêu thích, loại bỏ productId khỏi danh sách
-    //     const updatedFavorites = favoritesArray.filter(item => item !== productId);
-    //     await AsyncStorage.setItem('favorites', JSON.stringify(updatedFavorites));
-    //     setIsLiked(false);
-    //   } else {
-    //     // Nếu chưa yêu thích, thêm productId vào danh sách
-    //     favoritesArray.push(productId);
-    //     await AsyncStorage.setItem('favorites', JSON.stringify(favoritesArray));
-    //     setIsLiked(true);
-
-    //   }
-    //   setFavorites(favoritesArray);
-    // } catch (error) {
-    //   console.error('Lỗi khi lưu trạng thái yêu thích:', error);
-    // }
+    
   };
 
 
@@ -126,7 +66,6 @@ const FavoritesScreen = ({ navigation }) => {
 
       <FlatList
         data={favorites}
-        // keyExtractor={(item) => (item && item.id) ? item.id.toString() : ''}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
           <View>
@@ -182,7 +121,7 @@ const FavoritesScreen = ({ navigation }) => {
              )}
             <TouchableOpacity
               onPress={() => {
-                handleLikePress(item.id); // Gọi hàm saveFavorite với productId của sản phẩm
+                handleLikePress(item.id); 
               }}
               style={styles.heartIcon}>
               {/* Icon trái tim */}
@@ -194,7 +133,6 @@ const FavoritesScreen = ({ navigation }) => {
           </View>
         )}
       />
-
 
     </SafeAreaView>
 
