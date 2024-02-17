@@ -1,6 +1,7 @@
 import { ScrollView, StyleSheet, Text, View, TouchableOpacity, Image, TextInput, KeyboardAvoidingView } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { useFocusEffect } from '@react-navigation/native';
 import { URL } from './HomeScreen';
 
 const ContactScreen = ({ navigation }) => {
@@ -43,7 +44,7 @@ const ContactScreen = ({ navigation }) => {
         const errors = getErrors(email, name, phone, content);
         if (Object.keys(errors).length > 0) {
             setshowErrors(true)
-            seterrors(showErrors && errors)
+            seterrors(errors)
             console.log(errors);
         } else {
             const response = await fetch(`${URL}/contacts`, {
@@ -71,6 +72,18 @@ const ContactScreen = ({ navigation }) => {
         }
 
     }
+
+    useFocusEffect(
+        React.useCallback(() => {    
+          return () => {
+            setemail('');
+            setname('');
+            setphone('');
+            setcontent('');
+            
+          }
+        }, [])
+      );
 
 
     return (

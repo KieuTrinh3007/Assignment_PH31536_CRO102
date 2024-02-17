@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, SafeAreaView, Image, TouchableOpacity, TextInput } from 'react-native'
+import { StyleSheet, Text, View, SafeAreaView, Image, TouchableOpacity, TextInput, KeyboardAvoidingView, ScrollView } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { URL } from './HomeScreen';
@@ -74,30 +74,35 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
         const errors = getErrors(email, username, password, repassword);
         if (Object.keys(errors).length > 0) {
             setshowErrors(true)
-            seterrors(showErrors && errors)
+            seterrors(errors)
             console.log(errors);
         } else {
-            const response = await fetch(`${URL}/users`, {
-                method: 'PUT',
-                body: JSON.stringify({
-                    id: Date.now() + Math.random(),
-                    username: username,
-                    email: email,
-                    password: password,
-                }),
-                headers: {
-                    'Content-type': 'application/json; charset=UTF-8',
-                },
-            })
-
-            const result = await response.json();
-            if (result.id) {
-                seterrors({});
-                setshowErrors(false);
-                console.log('Đăng ký thành công');
-                navigation.goBack();
+            const responseUser = await fetch(`${URL}/users`);
+            const dataUser = await responseUser.json();
+            const emailStorage = await AsyncStorage.getItem('email');
+            const indexUser = dataUser.findIndex(item => item.email === emailStorage);
+            console.log('data user ====',dataUser, indexUser)
+            if(indexUser !== -1){
+                const response = await fetch(`${URL}/users/${dataUser[indexUser].id}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({
+                        username: username,
+                        email: email,
+                        password: password,
+                    }),
+                    headers: {
+                        'Content-type': 'application/json; charset=UTF-8',
+                    },
+                })
+    
+                const result = await response.json();
+                if (result.id) {
+                    seterrors({});
+                    setshowErrors(false);
+                    console.log('Đăng ký thành công');
+                    navigation.goBack();
+                }
             }
-
         }
         try {
             // Lưu thông tin đăng nhập vào AsyncStorage
@@ -111,8 +116,10 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
 
     return (
         <SafeAreaView style={{ backgroundColor: "black", ...StyleSheet.absoluteFillObject }}>
-
-            <View>
+  <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}>
+            <ScrollView>
 
                 <View style={styles.headerBar}>
                     <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -230,7 +237,8 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
                 </View>
 
 
-            </View>
+            </ScrollView>
+            </KeyboardAvoidingView>
 
             <TouchableOpacity
                 onPress={() => handelSave()}

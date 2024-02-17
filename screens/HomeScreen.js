@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, FlatList, Image, TouchableOpacity, ScrollView, TextInput, ToastAndroid } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export const URL = 'http://192.168.1.50:3000';
+export const URL = 'http://192.168.0.119:3000';
 
 
 const HomeScreen = ({ navigation }) => {

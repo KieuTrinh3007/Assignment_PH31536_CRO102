@@ -25,6 +25,17 @@ const OrderHistoryScreen = ({ navigation, route }) => {
     setListOrder(listOrder.sort((a,b) => a.createAt - b.createAt));
   }
 
+  const getTotalAmount = (timestamp) => {
+    let total = 0;
+    for (let i = 0; i < listOrder.length; i++) {
+      const {createAt, totalPrice} = listOrder[i];
+      if(new Date(Number(createAt)).toDateString() === new Date(Number(timestamp)).toDateString()){
+        total += totalPrice;
+      }
+    }
+    return total.toFixed(2);
+  }
+
 
   useFocusEffect(
     React.useCallback(() => {
@@ -40,12 +51,13 @@ const OrderHistoryScreen = ({ navigation, route }) => {
     };
 
     const createAt = new Date(Number(item.createAt));
+    const condtion = new Date(Number(listOrder[index-1]?.createAt || '0')).toDateString() != new Date(Number(listOrder[index].createAt)).toDateString();
 
     return (
       <ScrollView>
       <View>
         <View>
-        {new Date(listOrder[index-1]?.createAt || '0').toDateString() != new Date(listOrder[index].createAt).toDateString() ? 
+        { condtion ? 
           <View style = {{flexDirection: 'row', justifyContent: 'space-between', margin: 20}}>
             
             <View>
@@ -54,7 +66,7 @@ const OrderHistoryScreen = ({ navigation, route }) => {
             </View> 
             <View>
             <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 20 }}>Total Amount</Text>
-            <Text style={{ color: 'orange',  fontSize: 16, top: 5, left: 50 }}>$ 74.40</Text>
+            <Text style={{ color: 'orange',  fontSize: 16, top: 5, left: 50 }}>$ {getTotalAmount(item.createAt)}</Text>
 
             </View> 
           </View> : null }
@@ -69,7 +81,7 @@ const OrderHistoryScreen = ({ navigation, route }) => {
                 </Text>
               </View>
 
-              <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 25,}}>$ {item.totalPrice}</Text>
+              <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 25,}}>$ {item.totalPrice.toFixed(2)}</Text>
             </View>
 
             <View>
@@ -97,7 +109,7 @@ const OrderHistoryScreen = ({ navigation, route }) => {
                     <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 20, top: 25, left: 20 }}> $ {option.price}</Text>
                     <Text style={{ color: 'orange', fontWeight: 'bold', fontSize: 20, top: 25, left: 70  }}>X</Text>
                     <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 19, top: 25, left: 75  }}>{item.data[option.size]}</Text>
-                    <Text style={{ color: 'orange', fontWeight: 'bold', fontSize: 19, top: 25, left: 130 }}>{Number(item.data[option.size]) * option.price}</Text>
+                    <Text style={{ color: 'orange', fontWeight: 'bold', fontSize: 19, top: 25, left: 130 }}>{(Number(item.data[option.size]) * option.price).toFixed(2)}</Text>
                    
                   </View>
 
@@ -118,7 +130,7 @@ const OrderHistoryScreen = ({ navigation, route }) => {
   };
 
   return (
-    <SafeAreaView style={{ backgroundColor: 'black' }}>
+    <SafeAreaView style={{ backgroundColor: 'black', flex: 1 }}>
 
       <View>
 

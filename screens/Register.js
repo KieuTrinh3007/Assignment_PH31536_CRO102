@@ -56,7 +56,7 @@ const Register = ({ navigation }) => {
         const errors = getErrors(email, username, password, repassword);
         if (Object.keys(errors).length > 0) {
             setshowErrors(true)
-            seterrors(showErrors && errors)
+            seterrors(errors)
             console.log(errors);
         } else {
             const response = await fetch(`${URL}/users`, {

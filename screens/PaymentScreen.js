@@ -4,6 +4,11 @@ import { URL } from './HomeScreen';
 
 const PaymentScreen = ({route,navigation}) => {
   const {totalPrice, data} = route.params;
+  const [payments, setPayments] = useState([
+    {title: 'Wallet', image: require('../img/wallet.png'), highlight: false, subTitle: '$ 100.5' },
+    {title: 'Google Payt', image: require('../img/ggpay.png'), highlight: false }, 
+  {title: 'Apple Pay', image: require('../img/applepay.png'), highlight: false }, 
+  {title: 'Amazon Pay', image: require('../img/amazonpay.png'), highlight: false }])
 
   const onPayment = async () => {
     const resopnseCart = await fetch(`${URL}/carts`);
@@ -22,15 +27,17 @@ const PaymentScreen = ({route,navigation}) => {
         const {price, size} = element.giaSP[j];
         totalPrice += (Number(price) * (element.data[size] || 0))
       }
-      await fetch(`${URL}/orders`, {
-        method: 'POST',
-        body: JSON.stringify({
-          idSP: element.idSP,
-          createAt: Date.now()+"",
-          data: element.data,
-          totalPrice
+      if(totalPrice){
+        await fetch(`${URL}/orders`, {
+          method: 'POST',
+          body: JSON.stringify({
+            idSP: element.idSP,
+            createAt: Date.now()+"",
+            data: element.data,
+            totalPrice: Number(totalPrice.toFixed(2))
+          })
         })
-      })
+      }
     }
    
   }
@@ -90,50 +97,29 @@ const PaymentScreen = ({route,navigation}) => {
 
         </View>
 
-        <View style = {styles.khung}>
+        {payments.map((item, index) => {
+          return  <TouchableOpacity onPress={() => {
+            for (let i = 0; i < payments.length; i++) {
+              payments[i].highlight = false;
+            
+            }
+            payments[index].highlight = true;
+            setPayments([...payments])
+          }} key={item.title} style = {[styles.khung, {backgroundColor: item.highlight ? 'orange' : 'black'}]}>
           <View style = {styles.press}>
             <Image
-            source={require('../img/wallet.png')}
+            source={item.image}
             />
-            <Text style = {styles.textPayment}>Wallet</Text>
-            <Text style = {{marginLeft: 230, color: 'white', fontSize: 15}}>$ 100.50</Text>
+            <Text style = {styles.textPayment}>{item.title}</Text>
+            {item.subTitle ? <Text style = {{marginLeft: 230, color: 'white', fontSize: 15}}>{item.subTitle}</Text> : null}
 
           </View>
 
-        </View>
+        </TouchableOpacity>
+        })}
 
-        <View style = {styles.khung}>
-          <View style = {styles.press}>
-            <Image
-            source={require('../img/ggpay.png')}
-            />
-            <Text style = {styles.textPayment}>Google Payt</Text>
+       
 
-          </View>
-
-        </View>
-
-        <View style = {styles.khung}>
-          <View style = {styles.press}>
-            <Image
-            source={require('../img/applepay.png')}
-            />
-            <Text style = {styles.textPayment}>Apple Pay</Text>
-
-          </View>
-
-        </View>
-
-        <View style = {styles.khung}>
-          <View style = {styles.press}>
-            <Image
-            source={require('../img/amazonpay.png')}
-            />
-            <Text style = {styles.textPayment}>Amazon Pay</Text>
-
-          </View>
-
-        </View>
       </View>
 
       <View style = {{flexDirection: 'row', position: 'absolute', top: 650, backgroundColor: 'black', width: '100%', height: 70}}>

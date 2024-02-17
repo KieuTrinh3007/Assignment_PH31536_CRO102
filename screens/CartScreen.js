@@ -60,7 +60,7 @@ refCart.current = cart
       total += (Number(element.data[value.size] || 0)* Number(value.price));
      }
   }
-  return total;
+  return total.toFixed(2);
  },[cart])
 
   const CartCard = ({ item, index }) => {
@@ -69,7 +69,13 @@ refCart.current = cart
     const handleSizeSelection = (size) => {
       setSelectedSize(size);
     };
-    return (
+    let showItem = false;
+    for (const key in item.data) {
+      if(item.data[key] === '' || (item.giaSP.find(element => element.size === key) && Number(item.data[key]))){
+        showItem = true;
+      }
+    }
+    return !showItem ? null : (
       <View>
 
 
@@ -88,7 +94,7 @@ refCart.current = cart
           <View>
 
             {item.giaSP && item.giaSP.map(option => {
-              return (item.data[option.size] && Number(item.data[option.size])) ? <Text
+              return (item.data[option.size] === '' || (item.data[option.size] && Number(item.data[option.size]))) ? <Text
                 key={option.size}
                 onPress={() => handleSizeSelection(option)}
 
@@ -146,7 +152,7 @@ refCart.current = cart
     );
   };
   return (
-    <SafeAreaView style={{ backgroundColor: 'black' }}>
+    <SafeAreaView style={{ backgroundColor: 'black', flex: 1 }}>
 
       <View>
 
@@ -175,7 +181,7 @@ refCart.current = cart
        
       />
 
-      <View style={{ flexDirection: 'row', position: 'absolute', top: 702,  backgroundColor: 'black',width: '100%' , height: 'auto', justifyContent: 'space-between',  }}>
+      <View style={{ flexDirection: 'row',   backgroundColor: 'black',width: '100%' , height: 'auto', justifyContent: 'space-between',  }}>
         <View>
           <Text style={{ color: 'white', marginLeft: 20, marginTop: 10, fontSize: 15 }}>Total Price</Text>
           <Text style={{ color: 'white', marginLeft: 20, fontSize: 25, fontWeight: 'bold' }}>$ {totalPrice}</Text>
