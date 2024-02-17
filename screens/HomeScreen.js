@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, FlatList, Image, TouchableOpacity, ImageBackground, ScrollView, Alert, TextInput, ToastAndroid } from 'react-native';
+import { StyleSheet, Text, View, FlatList, Image, TouchableOpacity, ScrollView, TextInput, ToastAndroid } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export const URL = 'http://192.168.0.119:3000';
+export const URL = 'http://192.168.1.50:3000';
 
 
 const HomeScreen = ({ navigation }) => {
@@ -81,6 +81,7 @@ const HomeScreen = ({ navigation }) => {
                 idSP: item.id,
                 data: {"S": Number(cart.data['S'])+ 1 +"", "250gm": Number(cart.data['250gm'])+ 1+""}
             }
+            
         }
         const response = await fetch(url, {
             method,
@@ -88,7 +89,14 @@ const HomeScreen = ({ navigation }) => {
             headers: {
                 'Content-type': 'application/json; charset=UTF-8',
             },
-        })
+        });
+        if (response.ok) {
+            // Nếu thêm vào giỏ hàng thành công, hiển thị toast
+            ToastAndroid.show('Thêm giỏ hàng thành công', ToastAndroid.SHORT);
+        } else {
+            // Nếu có lỗi xảy ra, hiển thị toast thông báo lỗi
+            ToastAndroid.show('Đã xảy ra lỗi khi thêm vào giỏ hàng', ToastAndroid.SHORT);
+        }
     }
 
     return (
@@ -208,7 +216,8 @@ const HomeScreen = ({ navigation }) => {
 
                                                 <TouchableOpacity
                                                     style={styles.buttonadd}
-                                                    onPress={() => addCart(item)}>
+                                                    onPress={() => addCart(item)}
+                                                    >
                                                     <Image
                                                         style={styles.imgadd}
                                                         source={require('../img/add.png')} />

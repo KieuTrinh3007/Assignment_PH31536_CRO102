@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, StatusBar, ImageBackground, Image, TouchableOpacity, Pressable, ScrollView } from 'react-native'
+import { StyleSheet, Text, View, StatusBar, ImageBackground, Image, TouchableOpacity, Pressable, ScrollView, ToastAndroid } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { URL } from './HomeScreen';
 
@@ -91,7 +91,14 @@ const DetailsScreen = ({ navigation, route }) => {
           headers: {
               'Content-type': 'application/json; charset=UTF-8',
           },
-      })
+      });
+      if (response.ok) {
+        // Nếu thêm vào giỏ hàng thành công, hiển thị toast
+        ToastAndroid.show('Thêm vào giỏ hàng thành công', ToastAndroid.SHORT);
+    } else {
+        // Nếu có lỗi xảy ra, hiển thị toast thông báo lỗi
+        ToastAndroid.show('Đã xảy ra lỗi khi thêm vào giỏ hàng', ToastAndroid.SHORT);
+    }
   };
 
 

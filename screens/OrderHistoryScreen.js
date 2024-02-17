@@ -42,8 +42,8 @@ const OrderHistoryScreen = ({ navigation, route }) => {
     const createAt = new Date(Number(item.createAt));
 
     return (
+      <ScrollView>
       <View>
-
         <View>
         {new Date(listOrder[index-1]?.createAt || '0').toDateString() != new Date(listOrder[index].createAt).toDateString() ? 
           <View style = {{flexDirection: 'row', justifyContent: 'space-between', margin: 20}}>
@@ -63,14 +63,13 @@ const OrderHistoryScreen = ({ navigation, route }) => {
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
               <Image source={{ uri: item.linkAnh }} style={{ height: 90, width: 90, borderRadius: 10, }} />
               <View>
-
-                <Text style={{ fontWeight: 'bold', fontSize: 16, color: 'white', marginLeft: 5 }}>{item.tenSP}</Text>
-                <Text style={{ fontSize: 14, color: 'gray', marginLeft: 5 }}>
+                <Text style={{ fontWeight: 'bold', fontSize: 16, color: 'white',}}>{item.tenSP}</Text>
+                <Text style={{ fontSize: 14, color: 'gray'}}>
                   {item.loaiSP}
                 </Text>
               </View>
-              <Text style={{ color: 'orange', fontWeight: 'bold', fontSize: 25, bottom: 10, marginLeft: 10, top: 15 }}>$</Text>
-              <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 25, bottom: 10, marginLeft: 5, top: 15 }}>{item.totalPrice}</Text>
+
+              <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 25,}}>$ {item.totalPrice}</Text>
             </View>
 
             <View>
@@ -81,30 +80,28 @@ const OrderHistoryScreen = ({ navigation, route }) => {
                   onPress={() => handleSizeSelection(option)}
 
                 >
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                  <View style={{ flexDirection: 'row' }}>
                     <Text style={{
-                      color: 'white',
-                      textAlign: 'center',
-                      flexDirection: 'row',
-                      alignItems: 'center',
+                      color: 'white', 
                       paddingVertical: 10,
                       paddingHorizontal: 20,
                       borderRadius: 10,
-                      marginTop: 10,
+                      marginTop: 20,
                       fontSize: 15,
                       fontWeight: 'bold',
                       backgroundColor: 'black',
                     }}
                     >
                       {option.size}</Text>
-                    <Text style={{ color: 'white', marginTop: 15, marginHorizontal: 20, fontWeight: 'bold', fontSize: 20 }}> $ {option.price}</Text>
+
+                    <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 20, top: 25, left: 20 }}> $ {option.price}</Text>
+                    <Text style={{ color: 'orange', fontWeight: 'bold', fontSize: 20, top: 25, left: 70  }}>X</Text>
+                    <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 19, top: 25, left: 75  }}>{item.data[option.size]}</Text>
+                    <Text style={{ color: 'orange', fontWeight: 'bold', fontSize: 19, top: 25, left: 130 }}>{Number(item.data[option.size]) * option.price}</Text>
+                   
                   </View>
 
-                  <View style={styles.click1}>
-                    <Text style={{ color: 'orange', fontWeight: 'bold', fontSize: 19, bottom: 10, marginLeft: 40 }}>X</Text>
-                    <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18, bottom: 10 }}>{item.data[option.size]}</Text>
-                    <Text style={{ color: 'orange', fontWeight: 'bold', fontSize: 19, bottom: 10, marginLeft: 100 }}>{Number(item.data[option.size]) * option.price}</Text>
-                  </View>
+                
 
 
                 </Text> : null
@@ -115,6 +112,7 @@ const OrderHistoryScreen = ({ navigation, route }) => {
           </View>
         </View>
       </View>
+      </ScrollView>
 
     );
   };
@@ -211,11 +209,10 @@ const styles = StyleSheet.create({
   },
 
   cartCard: {
-    height: 270,
+    height: 'auto',
     borderRadius: 10,
     marginVertical: 10,
-    marginHorizontal: 20,
-    paddingHorizontal: 10,
+    marginHorizontal: 15,
     padding: 15,
     backgroundColor: '#262B33',
   },

@@ -143,7 +143,7 @@ export default FavoritesScreen
 
 const styles = StyleSheet.create({
   container: {
-    height: 800,
+    height: 'auto',
     color: "black",
     margin: 20,
     borderWidth: 1,

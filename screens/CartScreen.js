@@ -10,7 +10,8 @@ import { URL } from './HomeScreen';
 const CartScreen = ({ navigation, route }) => {
 
   const [cart, setCart] = useState([]);
-  const refCart = useRef(null)
+  const refCart = useRef(null);
+
 
   const getData = async () => {
     const response = await fetch(`${URL}/carts`);
@@ -49,18 +50,14 @@ refCart.current = cart
     }, [])
   );
 
-  const removeFromCart = (productId) => {
-    // Tạm thời để mô phỏng việc loại bỏ sản phẩm khỏi giỏ hàng
-    const updatedCart = cart.filter(item => item.id !== productId);
-    setCart(updatedCart);
-  };
+ 
 
  const totalPrice = useMemo(() => {
   let total = 0;
   for (let i = 0; i < cart.length; i++) {
     const element = cart[i];
      for (const value of element.giaSP) {
-      total += Number(element.data[value.size] || 0)* Number(value.price);
+      total += (Number(element.data[value.size] || 0)* Number(value.price));
      }
   }
   return total;
@@ -178,10 +175,10 @@ refCart.current = cart
        
       />
 
-      <View style={{ flexDirection: 'row', position: 'absolute', top: 630, backgroundColor: 'black', width: '100%', height: 70, margin: 20 }}>
+      <View style={{ flexDirection: 'row', position: 'absolute', top: 702,  backgroundColor: 'black',width: '100%' , height: 'auto', justifyContent: 'space-between',  }}>
         <View>
-          <Text style={{ color: 'white', marginLeft: 10, marginTop: 10, fontSize: 15 }}>Total Price</Text>
-          <Text style={{ color: 'white', marginLeft: 10, fontSize: 25, fontWeight: 'bold' }}>$ {totalPrice}</Text>
+          <Text style={{ color: 'white', marginLeft: 20, marginTop: 10, fontSize: 15 }}>Total Price</Text>
+          <Text style={{ color: 'white', marginLeft: 20, fontSize: 25, fontWeight: 'bold' }}>$ {totalPrice}</Text>
         </View>
         <TouchableOpacity onPress={() => navigation.navigate("PaymentScreen", {totalPrice, data: cart})}
           style={{ backgroundColor: "orange", width: '50%', justifyContent: 'center', alignItems: 'center', marginLeft: 80, margin: 10, borderRadius: 15 }}>
@@ -256,7 +253,7 @@ const styles = StyleSheet.create({
   },
 
   cartCard: {
-    height: 270,
+    height: 'auto',
     borderRadius: 10,
     marginVertical: 10,
     marginHorizontal: 20,
