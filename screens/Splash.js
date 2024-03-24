@@ -15,7 +15,7 @@ const Splash = ({navigation}) => {
     
    <View style = {styles.background}>
     <Image
-     source={require('../img/logo_splash.png')}
+     source={{uri: 'https://i.pinimg.com/564x/dc/62/cb/dc62cb032aaeddc205ed132493109e4f.jpg'}}
      style={{width: 200, height: 200, marginTop: 300, marginLeft: 120}}
     />
  

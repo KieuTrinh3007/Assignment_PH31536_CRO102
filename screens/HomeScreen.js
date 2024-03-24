@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { ImageBackground } from 'react-native';
 import { StyleSheet, Text, View, FlatList, Image, TouchableOpacity, ScrollView, TextInput, ToastAndroid } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export const URL = 'http://192.168.0.119:3000';
+export const URL = 'http://10.0.2.2:3000';
 
 
 const HomeScreen = ({ navigation }) => {
 
     const [search, setsearch] = useState('');
     // const [selectedCategory, setSelectedCategory] = useState('');
-    const [section, setSection] = useState([{ title: "All", id: 1, uriIcon: require('../img/cafe.png'), hide: true }, { title: "Cappuccino", id: 2, uriIcon: require('../img/cappuccino.png'), hide: false }, { title: "Americano", id: 3, uriIcon: require('../img/americano.png'), hide: false }, { title: "Coffee Beans", id: 4, uriIcon: require('../img/beans.png'), hide: false }, { title: "Cake", id: 5, uriIcon: require('../img/cake.png'), hide: false }])
+    const [section, setSection] = useState([{ title: "All", id: 1, uriIcon: require('../img/cafe.png'), hide: true }, { title: "Cây trồng", id: 2, uriIcon: require('../img/cappuccino.png'), hide: false }, { title: "Chậu cây trồng", id: 3, uriIcon: require('../img/americano.png'), hide: false }, { title: "Phụ kiện chăm sóc", id: 4, uriIcon: require('../img/beans.png'), hide: false }])
     const [danhSach, setDanhSach] = useState([]);
     const [initData, setInitData] = useState([]);
 
@@ -46,129 +47,46 @@ const HomeScreen = ({ navigation }) => {
 
     };
 
-    const filteredProducts = () => initData.filter((product) => {
-        if (product.tenSP && product.loaiSP && (product.tenSP.toLowerCase().includes(search.toLowerCase()) || product.loaiSP.toLowerCase().includes(search.toLowerCase()))) {
-            return product;
-        }
-        return false;
-    });
-
-
-
-    const handleSearch = (value) => {
-        setsearch(value);
-        if (!value.trim()) {
-            setDanhSach(initData)
-        } else {
-            setDanhSach(filteredProducts())
-        }
-    }
-
-    const addCart = async (item) => {
-        const responseCart = await fetch(URL+"/carts");
-        const dataCart = await responseCart.json();
-        const cart = dataCart.find(element => element.idSP == item.id);
-        let method = 'POST';
-        let url = URL + "/carts";
-        let body = {
-            idSP: item.id,
-            data: {"S": "1", "250gm": "1"}
-        }
-        if(cart){
-            url = URL + "/carts/"+cart.id;
-            method = 'PATCH';
-            body = {
-                idSP: item.id,
-                data: {"S": Number(cart.data['S'])+ 1 +"", "250gm": Number(cart.data['250gm'])+ 1+""}
-            }
-            
-        }
-        const response = await fetch(url, {
-            method,
-            body: JSON.stringify(body),
-            headers: {
-                'Content-type': 'application/json; charset=UTF-8',
-            },
-        });
-        if (response.ok) {
-            // Nếu thêm vào giỏ hàng thành công, hiển thị toast
-            ToastAndroid.show('Thêm giỏ hàng thành công', ToastAndroid.SHORT);
-        } else {
-            // Nếu có lỗi xảy ra, hiển thị toast thông báo lỗi
-            ToastAndroid.show('Đã xảy ra lỗi khi thêm vào giỏ hàng', ToastAndroid.SHORT);
-        }
-    }
+    
 
     return (
-        <SafeAreaView style={{ backgroundColor: "black", ...StyleSheet.absoluteFillObject }}>
+        <SafeAreaView style={{ backgroundColor: "white", ...StyleSheet.absoluteFillObject }}>
 
             <View style={styles.headerBar}>
-                <TouchableOpacity onPress={() => navigation.openDrawer()}>
-                    <View style={{ marginLeft: 20, marginTop: 20 }}>
-                        <Image
-                            source={require('../img/menu.png')}
-                            style={{ width: 40, height: 40 }}
-                            resizeMode="cover"
-                        />
-                    </View>
-                </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => navigation.navigate('PersonalDetailsScreen')}>
+                <ImageBackground
+                    source={require('../img/tree.png')}
+                    style={{ width: '100%', height: 350 }}
+                >
 
-                    <View style={styles.ImageContainer}>
+                    <TouchableOpacity onPress={() => navigation.navigate('CartScreen')}>
+
+                        <View style={styles.ImageContainer}>
 
 
-                        <Image
-                            source={require('../img/avatar.png')}
-                            style={{ width: 40, height: 40 }}
-                            resizeMode="cover"
-                        />
+                            <Image
+                                source={require('../img/giohang.png')}
+                                style={{ width: 50, height: 50, }}
+                                resizeMode="cover"
+                            />
 
-                    </View>
-                </TouchableOpacity>
-            </View>
+                        </View>
+                    </TouchableOpacity>
 
 
-            <Text style={{ color: "white", fontSize: 28, fontWeight: 'bold', margin: 20 }}>Find the best{'\n'}coffee for you</Text>
 
-            <View style={styles.InputContainer}>
-
-                <TouchableOpacity onPress={() => { }}>
-
-                    <Image
-                        source={require('../img/search.png')}
-                        style={styles.InputIcon}
-                        resizeMode="cover"
-                    />
-                </TouchableOpacity>
-                <TextInput
-                    style={styles.search}
-                    value={search}
-                    onChangeText={handleSearch}
-                    placeholder="Find your coffee..."
-                    placeholderTextColor="gray"
-
-                />
+                    <Text style={{ color: "black", fontSize: 28, marginLeft: 20 }}>Plan - toả sáng {'\n'}không gian nhà bạn</Text>
+                    <TouchableOpacity style={{ margin: 20, }}
+                        onPress={() => navigation.navigate('ListScreen')}>
+                        <Text style={{ color: 'green', fontSize: 18 }}>Xem hàng mới về  </Text>
+                    </TouchableOpacity>
+                </ImageBackground>
 
             </View>
 
-            <View style={styles.menu}>
-                <ScrollView
-                    horizontal={true}>
 
-                    {section.map((item, index) => (
-                        <TouchableOpacity key={item.id} onPress={() => handleSection(index)}>
-                            <View style={styles.item}>
-                                <Image style={styles.image}
-                                    source={item.uriIcon} />
-                                <Text style={styles.text}>{item.title}</Text>
-                            </View>
-                        </TouchableOpacity>
-                    ))}
-                </ScrollView>
-            </View>
 
-            <ScrollView>
+            <ScrollView style={{ marginTop: 30 }}>
                 {section.filter(item => !item.hide)
                     .map((element) => {
                         const list = danhSach.filter(obj => obj.loaiSP === element.title);
@@ -177,36 +95,36 @@ const HomeScreen = ({ navigation }) => {
 
                             <View key={element.id}>
 
-                                <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 20, marginLeft: 20 }}>{element.title}</Text>
+                                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 20, marginLeft: 20 }}>{element.title}</Text>
 
                                 <FlatList
-
+                                    style = {{marginHorizontal: 10}}
                                     data={list}
                                     keyExtractor={(item) => parseInt(item.id, 10).toString()}
-                                    horizontal={true}
-                                    renderItem={({ item }) => (
+                                    numColumns={2}
+                                    renderItem={({ item, index }) => index > 3 ? null: (
                                         <View style={styles.productItem}>
                                             <TouchableOpacity
 
                                                 onPress={() => {
-                                                    const priceS = item.giaSP.find(price => price.size === 'S' || price.size === '250gm');
+                                                    const priceS = item.giaSP.find(price => price.size === 'Nhỏ');
                                                     const price = priceS ? priceS.price + ' ' + priceS.currency : 'N/A'
 
-                                                    navigation.navigate("DetailsScreen", { item,id: item.id, giaSP: item.giaSP, image: item.linkAnh, title: item.tenSP, price: price, gia: item.giaSP, rate: item.danhGia, description: item.moTa })
+                                                    navigation.navigate("DetailsScreen", { item, id: item.id, giaSP: item.giaSP, loaiSP: item.loaiSP, image: item.linkAnh, title: item.tenSP, price: price, gia: item.giaSP, origin: item.xuatXu, classify: item.phanLoai })
                                                 }}
                                             >
                                                 <Image
-                                                    style={{ width: 150, height: 150, borderRadius: 20, margin: 7 }}
+                                                    style={{ width: 180, height: 150, borderRadius: 7 }}
                                                     source={{ uri: item.linkAnh }} />
-                                            </TouchableOpacity>
+                                           
 
                                             <View style={styles.ngang}>
                                                 <View style={{ width: 115, marginLeft: 5 }} >
-                                                    <Text style={{ color: 'white', fontSize: 17, fontWeight: 'bold' }}>{item.tenSP}</Text>
-
+                                                    <Text style={{ color: 'black', fontSize: 17, }}>{item.tenSP}</Text>
+                                                    <Text>{item.phanLoai}</Text>
                                                     {item.giaSP.map((price) => (
-                                                        price.size === 'S' || price.size === '250gm' ? (
-                                                            <Text style={{ color: 'white', fontSize: 16, marginTop: 5, fontWeight: 'bold' }}>
+                                                        price.size === 'Nhỏ' ? (
+                                                            <Text style={{ color: 'green', fontSize: 16, marginTop: 3, fontWeight: 'bold' }}>
                                                                 {price.currency} {price.price}
                                                             </Text>
                                                         ) : null
@@ -214,19 +132,17 @@ const HomeScreen = ({ navigation }) => {
 
                                                 </View>
 
-                                                <TouchableOpacity
-                                                    style={styles.buttonadd}
-                                                    onPress={() => addCart(item)}
-                                                    >
-                                                    <Image
-                                                        style={styles.imgadd}
-                                                        source={require('../img/add.png')} />
-                                                </TouchableOpacity>
                                             </View>
+                                            </TouchableOpacity>
                                         </View>
                                     )}
                                 />
 
+                                <TouchableOpacity onPress={() => navigation.navigate('ListScreen', {title: element.title}) }>
+                                <Text style = {{color: 'black', alignSelf: 'flex-end', marginRight: 20, marginTop: 20, fontSize: 18,textDecorationLine: 'underline'}}>Xem thêm {element.title}</Text>
+                                </TouchableOpacity>
+
+                                
                             </View>
                         )
                     })}
@@ -245,14 +161,13 @@ const styles = StyleSheet.create({
         color: 'black'
     },
     productItem: {
-        borderWidth: 1,
+        
         marginLeft: 20,
         marginTop: 20,
-        width: 170,
+        width: 180,
         height: 250,
-        borderBottomWidth: 1,
         borderRadius: 10,
-        backgroundColor: '#222222',
+        backgroundColor: '#D3D3D3',
         borderBottomColor: 'black',
     },
     img: {
@@ -292,37 +207,17 @@ const styles = StyleSheet.create({
     },
 
     ImageContainer: {
-        height: 40,
-        width: 40,
-        borderRadius: 12,
-        borderWidth: 2,
+        height: 50,
+        width: 50,
+        borderRadius: 40,
         marginTop: 20,
-        borderColor: "gray",
         alignItems: 'center',
-        marginLeft: 310,
+        marginLeft: 360,
         justifyContent: "center",
         overflow: 'hidden',
     },
 
-    InputContainer: {
-        margin: 20,
-        borderRadius: 20,
-        borderWidth: 2,
-        borderColor: "gray",
-        alignItems: 'center',
-        flexDirection: 'row',
-    },
 
-    InputIcon: {
-        marginHorizontal: 20,
-    },
-
-    search: {
-        flex: 1,
-        height: 50,
-        fontSize: 14,
-        color: 'white'
-    },
 
     menu: {
 
@@ -330,6 +225,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         marginLeft: 20,
         marginRight: 20,
+        marginTop: 20,
 
     },
 
@@ -351,7 +247,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
         fontSize: 14,
         fontWeight: 'normal',
-        color: 'orange'
+        color: 'green'
     },
 
 });

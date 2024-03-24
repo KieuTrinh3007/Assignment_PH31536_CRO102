@@ -5,54 +5,21 @@ import { URL } from './HomeScreen';
 
 const DetailsScreen = ({ navigation, route }) => {
 
-  const { image, title, price, rate, description, giaSP, item } = route.params;
+  const { image, title, price, origin, giaSP, item, loaiSP, classify} = route.params;
 
   // State để lưu trữ kích thước hiện tại của sản phẩm (S, M, L)
   const [size, setSize] = useState('S');
 
   // yêu thích
 
-  const [isLiked, setIsLiked] = useState(false);
 
   const [currentPrice, setCurrentPrice] = useState(price);
 
   const [cart, setCart] = useState([]);
 
-  useEffect(() => {
-    // Kiểm tra xem sản phẩm có trong danh sách yêu thích hay không
-    checkIsLiked();
-  }, []);
-
-  const checkIsLiked = async () => {
-    try {
-      const response = await fetch(`${URL}/favorites?id=${route.params.id}`);
-      const result = await response.json();
-      if (result?.length) {
-        setIsLiked(true)
-      }
-    } catch (error) {
-      console.error('Lỗi khi kiểm tra trạng thái yêu thích:', error);
-    }
-  };
-
-  const handleLikePress = async (productId) => {
-    if (isLiked) {
-      const response = await fetch(`${URL}/favorites/${route.params.id}`, { method: 'DELETE' });
-
-
-    } else {
-      const response = await fetch(`${URL}/favorites`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 'id': productId }),
-      });
-
-    }
-    setIsLiked(!isLiked)
-
-  };
+ 
+ 
+ 
 
 
 
@@ -68,148 +35,126 @@ const DetailsScreen = ({ navigation, route }) => {
   };
 
   const addToCart = async () => {
-      const responseCart = await fetch(URL+"/carts");
-      const dataCart = await responseCart.json();
-      const cart = dataCart.find(element => element.idSP == item.id);
-      let method = 'POST';
-      let url = URL + "/carts";
-      let body = {
-          idSP: item.id,
-          data: {[size]: "1"}
+    const responseCart = await fetch(URL + "/carts");
+    const dataCart = await responseCart.json();
+    const cart = dataCart.find(element => element.idSP == item.id);
+    let method = 'POST';
+    let url = URL + "/carts";
+    let body = {
+      idSP: item.id,
+      data: { [size]: "1" }
+    }
+    if (cart) {
+      url = URL + "/carts/" + cart.id;
+      method = 'PATCH';
+      body = {
+        idSP: item.id,
+        data: { ...cart.data, [size]: Number(cart.data[size] || 0) + 1 + "" }
       }
-      if(cart){
-          url = URL + "/carts/"+cart.id;
-          method = 'PATCH';
-          body = {
-              idSP: item.id,
-              data: {...cart.data,[size]: Number(cart.data[size] || 0)+ 1 +""}
-          }
-      }
-      const response = await fetch(url, {
-          method,
-          body: JSON.stringify(body),
-          headers: {
-              'Content-type': 'application/json; charset=UTF-8',
-          },
-      });
-      if (response.ok) {
-        // Nếu thêm vào giỏ hàng thành công, hiển thị toast
-        ToastAndroid.show('Thêm vào giỏ hàng thành công', ToastAndroid.SHORT);
+    }
+    const response = await fetch(url, {
+      method,
+      body: JSON.stringify(body),
+      headers: {
+        'Content-type': 'application/json; charset=UTF-8',
+      },
+    });
+    if (response.ok) {
+      // Nếu thêm vào giỏ hàng thành công, hiển thị toast
+      ToastAndroid.show('Thêm vào giỏ hàng thành công', ToastAndroid.SHORT);
     } else {
-        // Nếu có lỗi xảy ra, hiển thị toast thông báo lỗi
-        ToastAndroid.show('Đã xảy ra lỗi khi thêm vào giỏ hàng', ToastAndroid.SHORT);
+      // Nếu có lỗi xảy ra, hiển thị toast thông báo lỗi
+      ToastAndroid.show('Đã xảy ra lỗi khi thêm vào giỏ hàng', ToastAndroid.SHORT);
     }
   };
 
 
   return (
     <View style={styles.container}>
-      <StatusBar
-        translucent
-        backgroundColor="rgba(0,0,0,0)"
-      />
-      <ImageBackground
+
+      <View style={styles.headerBar}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <View>
+            <Image
+              source={require('../img/back1.png')}
+              style={{ width: 25, height: 25 }}
+              resizeMode="cover"
+            />
+          </View>
+        </TouchableOpacity>
+        <Text style={styles.cart}>{title}</Text>
+
+        <TouchableOpacity onPress={() => navigation.navigate('CartScreen')}>
+          <Image style={{ width: 25, height: 25 }}
+            resizeMode="cover"
+            source={require('../img/cart.png')}
+          />
+        </TouchableOpacity>
+      </View>
+
+      <Image
         source={{ uri: image }}
         style={styles.headerImage}
-      >
+      />
 
-        <View style={styles.body}>
-          <View style={{ flexDirection: 'row' }}>
+      <View style = {{flexDirection: 'row'}}>
+      <Text style = {{backgroundColor: 'green', width: '30%',textAlign:'center', padding: 5, color: 'white', marginHorizontal: 30,paddingLeft: 13, marginVertical: 20}}>{loaiSP}</Text>
+      {classify ? <Text style = {{backgroundColor: 'green', width: '30%', textAlign:'center',padding: 5, color: 'white', marginHorizontal: 30,paddingLeft: 13, marginVertical: 20}}>{classify}</Text> 
+      : null}
+      </View>
+       <View style = {{marginHorizontal: 30}}>
 
-            <View>
+          <Text style = {{color: 'green', fontSize: 30, marginBottom: 10, fontWeight: 'bold'}}>{currentPrice} </Text>
 
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', marginLeft: 20, marginTop: 20 }}>{title}</Text>
+          <Text style={{ color: 'black', fontSize: 20, fontWeight: 'normal' }}>Chi tiết sản phẩm</Text>
+          <View style={{ borderBottomColor: 'gray', borderBottomWidth: 1, marginTop: 5 }} />
 
-
-                <Image
-                  source={require('../img/coffee1.png')}
-
-                  style={{ width: 35, height: 35, borderRadius: 10, marginLeft: 90, marginTop: 10, }}
-                />
-                <Image
-                  source={require('../img/milk1.png')}
-
-                  style={{ width: 25, height: 30, borderRadius: 10, marginTop: 10, marginLeft: 20, }}
-                />
-              </View>
-
-              <Text style={{ color: 'gray', marginLeft: 20 }}>With Steamed Milk</Text>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
-
-                <Image
-                  source={require('../img/rate.png')}
-
-                  style={{ width: 40, height: 30, borderRadius: 10, marginLeft: 20, marginTop: 10 }}
-                />
-
-                <Text style={{ color: 'white', marginRight: 160, fontSize: 25, fontWeight: 'bold' }}>{rate}</Text>
-
-                <Text style={{ color: 'gray', fontWeight: 'bold' }}>Medium Roasted</Text>
-
-              </View>
-            </View>
+         
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 10  }}>
+            <Text style={{ color: 'black', fontSize: 18, fontWeight: 'normal' }}>Xuất xứ</Text>
+            <Text style={{ color: 'black', fontSize: 18, fontWeight: 'normal' }}>{origin}</Text>
           </View>
 
-          <ScrollView contentContainerStyle={{ backgroundColor: 'black', padding: 20 }}>
+          <View style={{ borderBottomColor: 'gray', borderBottomWidth: 1,marginTop: 5 }} />
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 10  }}>
+            <Text style={{ color: 'black', fontSize: 18, fontWeight: 'normal' }}>Tình trạng</Text>
+            <Text style={{ color: 'green', fontSize: 18, fontWeight: 'normal' }}>Còn 156 sản phẩm</Text>
+          </View>
+          <View style={{ borderBottomColor: 'gray', borderBottomWidth: 1,marginTop: 5 }} />
 
-            <Text style={{ color: 'white', fontSize: 20, fontWeight: 'normal' }}>Description</Text>
-            <Text style={styles.tripInfo}>{description}</Text>
-            <Text style={{ color: 'white', fontSize: 16, fontWeight: 'normal', marginTop: 15 }}>Size</Text>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-around', flex: 1 }}>
-              {giaSP.map(item => {
-                return <TouchableOpacity
-                  key={item.size}
-                  onPress={() => handleSizeSelection(item)}
-                  style={{ padding: 7, width: '20%', borderRadius: 10, marginTop: 10, borderColor: size === item.size ? 'orange' : 'gray', borderWidth: 2 }}
-                >
-                  <Text style={{ color: 'white', textAlign: 'center' }}>{item.size}</Text>
-                </TouchableOpacity>
-              })}
-            </View>
-          </ScrollView>
-
-          <View style={styles.footer}>
-
-            <View style={{ flexDirection: 'row' }}>
-
-              <View style={styles.price}>
-                <Text style={{ color: 'white' }}>Price</Text>
-                <Text style={styles.priceText}>$ {currentPrice}</Text>
-              </View>
-
-              <TouchableOpacity onPress = {addToCart }
-              style={styles.bookButton}>
-                <Text style={styles.buttonText}>Add to Card</Text>
+          <Text style={{ color: 'black', fontSize: 18, fontWeight: 'normal', marginTop: 15 }}>Kích cỡ</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-around'}}>
+            {giaSP.map(item => {
+              return <TouchableOpacity
+                key={item.size}
+                onPress={() => handleSizeSelection(item)}
+                style={{ padding: 7, width: '20%', borderRadius: 10, marginTop: 20, borderColor: size === item.size ? 'orange' : 'gray', borderWidth: 2 }}
+              >
+                <Text style={{ color: 'black', textAlign: 'center' }}>{item.size}</Text>
               </TouchableOpacity>
+            })}
+          </View>
+          </View>
+
+        <View style = {{marginTop: 30}}>
+
+          <View style={{ flexDirection: 'row' , justifyContent: 'space-between', marginHorizontal: 30}}>
+
+              <Text style={{ color: 'black', fontSize: 20, marginRight: 200 }}>Tạm tính:</Text>
+              <Text style={styles.priceText}>$ {currentPrice}</Text>
             </View>
 
-
-            <TouchableOpacity
-              onPress={() => handleLikePress(route.params.id)}
-              style={styles.heartIcon}>
-              {/* Icon trái tim */}
-              <Image
-                source={isLiked ? require('../img/heart1.png') : require('../img/heart.png')}
-                style={{ width: 30, height: 30 }}
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              style={styles.back}>
-
-              <Image
-                source={require('../img/back1.png')}
-                style={{ width: 20, height: 20 }}
-              />
-            </TouchableOpacity>
-          </View>
+      
+        <TouchableOpacity onPress={addToCart}
+          style={styles.bookButton}>
+          <Text style={styles.buttonText}>Chọn mua</Text>
+        </TouchableOpacity>
         </View>
+      </View>
 
 
-      </ImageBackground>
-    </View>
+
+    
   )
 }
 
@@ -226,7 +171,7 @@ const styles = StyleSheet.create({
   },
   headerImage: {
     width: '100%',
-    height: '100%',
+    height: '35%',
     resizeMode: 'cover',
 
   },
@@ -241,27 +186,27 @@ const styles = StyleSheet.create({
   },
 
   body: {
-    flex: 3,
     borderRadius: 20,
-    backgroundColor: "rgba(0,0,0,0.6)",
-    marginTop: 370,
+    margin: 20,
+    backgroundColor: 'white'
+
 
   },
   tripInfo: {
     fontSize: 15,
     lineHeight: 24,
     fontWeight: 'normal',
-    color: 'white',
+    color: 'black',
     marginTop: 10,
-    height: 90,
+    height: 70,
 
   },
   footer: {
-    height: 100,
+    height: 50,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
-    backgroundColor: 'black',
+    backgroundColor: 'white',
     paddingVertical: 10,
 
   },
@@ -271,17 +216,17 @@ const styles = StyleSheet.create({
   priceText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: 'white',
-    marginTop: 5,
+    color: 'black',
   },
   bookButton: {
-    flex: 3,
-    backgroundColor: 'orange',
+   marginHorizontal: 20,
+    backgroundColor: 'green',
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 7,
     borderRadius: 15,
+    marginTop: 20
 
 
   },
@@ -291,16 +236,27 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
 
   },
-  heartIcon: {
-    position: 'absolute',
-    right: 16,
-    bottom: 730,
 
+  headerBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginHorizontal: 20,
+    marginVertical: 10
   },
-  back: {
-    position: 'absolute',
-    left: 16,
-    bottom: 740,
-
+  cart: {
+    fontWeight: 'bold',
+    fontSize: 22,
+    textAlign: 'center',
+    color: "black",
+    marginTop: 10
+  },
+  image1: {
+    width: 40,
+    height: 40,
+    marginRight: 120,
+    marginLeft: 10,
+    borderRadius: 10,
+    marginBottom: 5
   },
 })

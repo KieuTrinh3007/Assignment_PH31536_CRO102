@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, Alert } from 'react-native'
+import { StyleSheet, Text, View, Image, Alert, ToastAndroid } from 'react-native'
 import React from 'react'
 import { DrawerContentScrollView, DrawerItem, DrawerItemList } from '@react-navigation/drawer'
 
@@ -20,13 +20,14 @@ const MyHeader = ()=>{
       [
         {
           text: 'No',
-          onPress: () => console.log('Hủy đăng xuất'),
+          onPress: () =>  ToastAndroid.show('Hủy đăng xuất', ToastAndroid.SHORT),
           style: 'cancel',
         },
         {
           text: 'Yes',
           onPress: () => {
             if (props && props.navigation) {
+              ToastAndroid.show('Đăng xuất thành công', ToastAndroid.SHORT)
                 props.navigation.navigate('Login');
               }
           },

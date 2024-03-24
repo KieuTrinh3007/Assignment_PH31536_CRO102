@@ -1,17 +1,17 @@
-import { Image, ScrollView, StyleSheet, Text, TextInput, View,TouchableOpacity, SafeAreaView, KeyboardAvoidingView } from 'react-native'
+import { Image, ScrollView, StyleSheet, Text, TextInput, View, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, ToastAndroid } from 'react-native'
 import React, { useState } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { URL } from './HomeScreen';
-
-
+import CheckBox from '@react-native-community/checkbox';
 
 const Login = (props) => {
-    const {navigation} = props;
+    const { navigation } = props;
     const [email, setemail] = useState('trinhpkph31536@fpt.edu.vn');
     const [password, setpassword] = useState('nhokgl9x');
     const [showPassword, setShowPassword] = useState(false);
     const [errors, seterrors] = useState({});
     const [username, setUsername] = useState('');
+    const [toggleCheckBox, setToggleCheckBox] = useState(false)
 
 
     const toggleShowPassword = () => {
@@ -24,212 +24,253 @@ const Login = (props) => {
 
         const errors = getErrors(email, password);
         if (Object.keys(errors).length > 0) {
-           
+
             seterrors(errors)
-           
+
             return;
-            
+
         } else {
-           
-                // thực hiện fetch lấy dữ liệu về
-                let url_check_login = `${URL}/users?email=` + email;
-                fetch(url_check_login)
-                    .then((res) => { return res.json(); })
-                    .then(async (res_login) => {
-                        if (res_login.length != 1) {
-                            seterrors({ email: 'Email không tồn tại' });
+
+            // thực hiện fetch lấy dữ liệu về
+            let url_check_login = `${URL}/users?email=` + email;
+            fetch(url_check_login)
+                .then((res) => { return res.json(); })
+                .then(async (res_login) => {
+                    if (res_login.length != 1) {
+                        seterrors({ email: 'Email không tồn tại' });
+                    } else {
+                        let objU = res_login[0];
+                        if (objU.password !== password) {
+                            seterrors({ password: 'Mật khẩu không đúng' });
+                            return;
                         } else {
-                            let objU = res_login[0];
-                            if (objU.password !== password) {
-                                seterrors({ password: 'Mật khẩu không đúng' });
-                                return;
-                            } else {
-                                try {
-                                    const jsonString = JSON.stringify(objU);
-                                    await AsyncStorage.setItem('loginInfo', jsonString);
-                                    await AsyncStorage.setItem('username', objU.username); // Lưu username vào AsyncStorage
-                                    await AsyncStorage.setItem('email', email);
-                                    console.log(username);
-                                    seterrors({});
-                                    console.log('Đăng nhập thành công');
-                                    props.navigation.navigate('DrawerNavigator');
-                                  
-                                } catch (e) {
-                                    console.log(e);
-                                }
+                            try {
+                                const jsonString = JSON.stringify(objU);
+                                await AsyncStorage.setItem('loginInfo', jsonString);
+                                await AsyncStorage.setItem('username', objU.username); // Lưu username vào AsyncStorage
+                                await AsyncStorage.setItem('email', email);
+                                console.log(username);
+                                seterrors({});
+                                ToastAndroid.show('Đăng nhập thành công', ToastAndroid.SHORT);
+                                props.navigation.navigate('DrawerNavigator');
+
+                            } catch (e) {
+                                console.log(e);
                             }
                         }
-
-
                     }
 
 
-                    )
-            }
+                }
 
+
+                )
         }
 
+    }
 
-        const getErrors = (email, password) => {
-            const errors = {};
-           
-            if (!email) {
-                errors.email = "Vui lòng nhập Email"
-            } else if (!email.includes('@') || !email.includes('.')){
-                errors.email = "Email không hợp lệ";
-            }
 
-            if (!password) {
-                errors.password = "Vui lòng nhập Password"
-            } else if (password.length < 6) {
-                errors.password = "Mật khẩu tối thiểu phải có 6 ký tự"
-            }
+    const getErrors = (email, password) => {
+        const errors = {};
 
-            return errors;
+        if (!email) {
+            errors.email = "Vui lòng nhập Email"
+        } else if (!email.includes('@') || !email.includes('.')) {
+            errors.email = "Email không hợp lệ";
         }
 
-        return (
-            <SafeAreaView style={st.background}>
-                <KeyboardAvoidingView>
-                    <ScrollView>
+        if (!password) {
+            errors.password = "Vui lòng nhập Password"
+        } else if (password.length < 6) {
+            errors.password = "Mật khẩu tối thiểu phải có 6 ký tự"
+        }
 
-                        {/* // Logo app */}
+        return errors;
+    }
 
-                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 40 }}>
-                            <Image
-                                resizeMode='contain'
-                                source={require('../img/logo_login.png')}
-                                style={{ width: 200, height: 120 }}
-                            />
-                        </View>
-                        <Text style={st.welcom}>Welcom to Lungo !!</Text>
-                        <Text style={st.welcom2}>Login to Continue</Text>
+    return (
+        <SafeAreaView style={st.background}>
+            <KeyboardAvoidingView>
+                <ScrollView>
 
-                        {/* // Nhập username */}
+                    {/* // Logo app */}
+
+                    <View>
+                        <Image
+
+                            source={require('../img/logo_login.png')}
+                            style={{ width: 433, height: 370 }}
+                        />
+                    </View>
+                    <Text style={st.welcom}>Chào mừng bạn</Text>
+                    <Text style={st.welcom2}>Đăng nhập tài khoản</Text>
+
+                    {/* // Nhập username */}
+                    <TextInput
+                        style={st.khung}
+                        value={email}
+                        onChangeText={(txt) => { setemail(txt) }}
+                        placeholder="Nhập email"
+                        placeholderTextColor="gray"
+                    />
+
+                    {errors.email && (
+                        <Text style={{ fontSize: 16, color: 'red', marginLeft: 20 }}>
+                            {errors.email}
+                        </Text>
+                    )}
+
+                    {/* // Nhập password */}
+                    <View>
                         <TextInput
                             style={st.khung}
-                            value={email}
-                            onChangeText={(txt) => { setemail(txt) }}
-                            placeholder="Email Address"
+                            value={password}
+                            onChangeText={(txt) => { setpassword(txt) }}
+                            placeholder="Mật khẩu"
                             placeholderTextColor="gray"
-                        />
+                            secureTextEntry={!showPassword}
 
-                        {errors.email && (
+                        />
+                        {errors.password && (
                             <Text style={{ fontSize: 16, color: 'red', marginLeft: 20 }}>
-                                {errors.email}
+                                {errors.password}
                             </Text>
                         )}
 
-                        {/* // Nhập password */}
-                        <View>
-                            <TextInput
-                                style={st.khung}
-                                value={password}
-                                onChangeText={(txt) => { setpassword(txt) }}
-                                placeholder="Password"
-                                placeholderTextColor="gray"
-                                secureTextEntry={!showPassword}
-
+                        <TouchableOpacity
+                            onPress={toggleShowPassword}
+                            style={{ position: 'absolute', right: 40, top: 25 }}
+                        >
+                            <Image
+                                source={showPassword ? require('../img/eye.png') : require('../img/eye1.png')}
+                                style={{ width: 24, height: 24, tintColor: 'black' }}
                             />
-                            {errors.password && (
-                                <Text style={{ fontSize: 16, color: 'red', marginLeft: 20 }}>
-                                    {errors.password}
-                                </Text>
-                            )}
+                        </TouchableOpacity>
+                    </View>
 
-                            <TouchableOpacity
-                                onPress={toggleShowPassword}
-                                style={{ position: 'absolute', right: 40, top: 40 }}
-                            >
-                                <Image
-                                    source={showPassword ? require('../img/eye.png') : require('../img/eye1.png')}
-                                    style={{ width: 24, height: 24, tintColor: 'white' }}
-                                />
-                            </TouchableOpacity>
+                    <View style={{ flexDirection: 'row', marginHorizontal: 20, justifyContent: 'space-between' }}>
+
+                            <View style = {{flexDirection: 'row'}}>
+
+                           
+                        <CheckBox
+
+                            disabled={false}
+                            value={toggleCheckBox}
+                            onValueChange={(newValue) => setToggleCheckBox(newValue)}
+                        />
+                        <Text style = {{top: 5}}>Nhớ tài khoản</Text>
                         </View>
-
-
-
-                        {/* // Button Login */}
-
-                        <TouchableOpacity
-                            onPress={doLogin}
-                            style={st.khungButton}
-
-                        >
-                            <Text style={{ color: "white", textAlign: 'center', fontSize: 20, fontWeight: 'bold' }}>Login</Text>
+                        <TouchableOpacity>
+                            <Text style={{ color: 'green', top: 5 }}>Forgot Password ?</Text>
                         </TouchableOpacity>
 
-                        {/* // Button Google */}
+                    </View>
 
+                   
+
+
+
+
+                    {/* // Button Login */}
+
+                    <TouchableOpacity
+                        // onPress={doLogin}
+                        onPress={() => navigation.navigate('DrawerNavigator')}
+                        style={st.khungButton}
+
+                    >
+                        <Text style={{ color: "white", textAlign: 'center', fontSize: 20, fontWeight: 'bold' }}>Đăng nhập</Text>
+                    </TouchableOpacity>
+
+                    <View style={st.container}>
+                        <View style={st.line}></View>
+                        <Text style={st.text}>Hoặc</Text>
+                        <View style={st.line}></View>
+                    </View>
+
+
+
+
+                    {/* // Button Google */}
+
+
+
+                    <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
                         <TouchableOpacity
-
-                            style={st.khungButton1}
                         >
-
-                            <View style={{ flexDirection: 'row' }}>
-                                <Image
-                                    source={require('../img/icon_google.png')}
-                                    style={{ width: 30, height: 30, marginLeft: 20 }}
-                                />
-                                <Text style={{ color: "black", textAlign: 'center', fontSize: 20, fontWeight: 'bold', marginLeft: 60 }}>
-                                    Sign in with Google
-                                </Text>
-
-                            </View>
-
+                            <Image
+                                source={require('../img/icon_google.png')}
+                                style={{ width: 30, height: 30 }}
+                            />
 
                         </TouchableOpacity>
 
-                        <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'center' }}>
-                            <Text style={{ color: "gray", fontWeight: 'bold', textAlign: 'center', marginTop: 15 }}>
-                                Don't have account? Click</Text>
+                        <TouchableOpacity
+                        >
+                            <Image
+                                source={require('../img/icon_facebook.png')}
+                                style={{ width: 30, height: 30, marginLeft: 30 }}
+                            />
 
-                            <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-                                <Text style={{ color: "orange", fontWeight: 'bold', marginTop: 15 }}> Register</Text>
-                            </TouchableOpacity>
+                        </TouchableOpacity>
+                    </View>
 
+                    <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'center' }}>
+                        <Text style={{ color: "gray", fontWeight: 'bold', textAlign: 'center', marginTop: 15 }}>
+                            Bạn không có tài khoản?</Text>
 
-                        </View>
-
-
-                        <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'center' }}>
-                            <Text style={{ color: "gray", fontWeight: 'bold', textAlign: 'center', marginTop: 15 }}>
-                                Forget Password? Click</Text>
-
-                            <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-                                <Text style={{ color: "orange", fontWeight: 'bold', marginTop: 15 }}> Reset</Text>
-                            </TouchableOpacity>
+                        <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+                            <Text style={{ color: "green", fontWeight: 'bold', marginTop: 15 }}> Tạo tài khoản</Text>
+                        </TouchableOpacity>
 
 
-                        </View>
+                    </View>
 
 
-                    </ScrollView>
-                </KeyboardAvoidingView>
-            </SafeAreaView>
 
-        )
-    }
 
-    export default Login
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </SafeAreaView>
 
-    const st = StyleSheet.create({
-        background: { ...StyleSheet.absoluteFillObject, backgroundColor: "black" },
-        welcom: { fontSize: 27, textAlign: "center", color: "white", fontWeight: 'bold' },
-        welcom2: { fontSize: 20, textAlign: "center", color: "gray", marginTop: 20, fontWeight: 'bold', marginBottom: 20 },
-        khung: { borderColor: "orange", borderWidth: 1, borderRadius: 10, padding: 20, margin: 20, color: "white", fontSize: 20 },
-        khungButton: { backgroundColor: "#D2691E", borderWidth: 1, borderRadius: 25, padding: 15, margin: 15 },
-        khungButton1: { backgroundColor: "#FFFFFF", borderWidth: 1, borderRadius: 25, padding: 15, margin: 15, marginTop: 5 },
+    )
+}
 
-        checkboxContainer: {
-            flexDirection: 'row',
-            marginBottom: 20,
-        },
-        checkbox: {
-            alignSelf: 'center',
-        },
-        label: {
-            margin: 8,
-        },
-    })
+export default Login
+
+const st = StyleSheet.create({
+    background: { ...StyleSheet.absoluteFillObject, backgroundColor: "white" },
+    welcom: { fontSize: 30, textAlign: "center", color: "black", fontWeight: 'bold' },
+    welcom2: { fontSize: 20, textAlign: "center", color: "black", marginTop: 5, marginBottom: 10 },
+    khung: { borderColor: "#C0C0C0", borderWidth: 1, borderRadius: 10, padding: 10, marginHorizontal: 20, marginVertical: 10, color: "black", fontSize: 18 },
+    khungButton: { backgroundColor: "#007537", borderWidth: 1, borderRadius: 20, padding: 15, margin: 15 },
+    khungButton1: { backgroundColor: "#FFFFFF", borderWidth: 1, borderRadius: 25, padding: 15, margin: 15, marginTop: 5 },
+
+    checkboxContainer: {
+        flexDirection: 'row',
+        marginBottom: 20,
+    },
+    checkbox: {
+        alignSelf: 'center',
+    },
+    label: {
+        margin: 8,
+    },
+    container: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginHorizontal: 20,
+        marginBottom: 10
+
+    },
+    line: {
+        flex: 1,
+        height: 1.5,
+        backgroundColor: 'green',
+    },
+    text: {
+        marginHorizontal: 10,
+    },
+})

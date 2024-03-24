@@ -1,4 +1,4 @@
-import { Image, ScrollView, StyleSheet, Text, TextInput, View, CheckBox, Button, TouchableOpacity, SafeAreaView, KeyboardAvoidingView } from 'react-native'
+import { Image, ScrollView, StyleSheet, Text, TextInput, View, CheckBox, Button, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, ToastAndroid } from 'react-native'
 import React, { useState } from 'react'
 import { URL } from './HomeScreen';
 
@@ -73,13 +73,13 @@ const Register = ({ navigation }) => {
             })
 
             const result = await response.json();
-            if(result.id){
+            if (result.id) {
                 seterrors({});
                 setshowErrors(false);
-                console.log('Đăng ký thành công');
+                ToastAndroid.show('Đăng ký thành công', ToastAndroid.SHORT);
                 navigation.goBack();
             }
-           
+
         }
 
     }
@@ -94,23 +94,23 @@ const Register = ({ navigation }) => {
 
                     {/* // Logo app */}
 
-                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 40 }}>
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                         <Image
-                            resizeMode='contain'
+
                             source={require('../img/logo_login.png')}
-                            style={{ width: 200, height: 120 }}
+                            style={{ width: 433, height: 370 }}
                         />
                     </View>
 
-                    <Text style={st.welcom}>Welcom to Lungo !!</Text>
-                    <Text style={st.welcom2}>Register to Continue</Text>
+                    <Text style={st.welcom}>Đăng ký!!</Text>
+                    <Text style={st.welcom2}>Tạo tài khoản</Text>
 
                     <View>
                         <TextInput
                             style={st.khung}
                             value={username}
                             onChangeText={(txt) => { setusername(txt) }}
-                            placeholder="Username"
+                            placeholder="Họ tên"
                             placeholderTextColor="gray"
                         />
                         {errors.username && (
@@ -126,7 +126,7 @@ const Register = ({ navigation }) => {
                             style={st.khung}
                             value={email}
                             onChangeText={(txt) => { setemail(txt) }}
-                            placeholder="Email Address"
+                            placeholder="Email "
                             placeholderTextColor="gray"
                         />
                         {errors.email && (
@@ -143,7 +143,7 @@ const Register = ({ navigation }) => {
                             style={st.khung}
                             value={password}
                             onChangeText={(txt) => { setpassword(txt) }}
-                            placeholder="Password"
+                            placeholder="Mật khẩu"
                             placeholderTextColor="gray"
                             secureTextEntry={!showPassword}
 
@@ -158,11 +158,11 @@ const Register = ({ navigation }) => {
 
                         <TouchableOpacity
                             onPress={toggleShowPassword}
-                            style={{ position: 'absolute', right: 40, top: 35 }}
+                            style={{ position: 'absolute', right: 40, top: 25 }}
                         >
                             <Image
                                 source={showPassword ? require('../img/eye.png') : require('../img/eye1.png')} // Điều này phụ thuộc vào tên biểu tượng của thư viện bạn đang sử dụng
-                                style={{ width: 24, height: 24, tintColor: 'white' }}
+                                style={{ width: 24, height: 24, tintColor: 'black' }}
                             />
                         </TouchableOpacity>
                     </View>
@@ -172,7 +172,7 @@ const Register = ({ navigation }) => {
                             style={st.khung}
                             value={repassword}
                             onChangeText={(txt) => { setrepassword(txt) }}
-                            placeholder="Confirm password"
+                            placeholder="Nhập lại mật khẩu"
                             placeholderTextColor="gray"
                             secureTextEntry={!showRePassword}
 
@@ -187,30 +187,72 @@ const Register = ({ navigation }) => {
 
                         <TouchableOpacity
                             onPress={toggleShowRePassword}
-                            style={{ position: 'absolute', right: 40, top: 35 }}
+                            style={{ position: 'absolute', right: 40, top: 25 }}
                         >
                             <Image
                                 source={showRePassword ? require('../img/eye.png') : require('../img/eye1.png')}
-                                style={{ width: 24, height: 24, tintColor: 'white' }}
+                                style={{ width: 24, height: 24, tintColor: 'black' }}
                             />
                         </TouchableOpacity>
                     </View>
 
 
+                    <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'center', marginHorizontal: 20 }}>
+                        <Text style={{ color: "black", textAlign: 'center', marginTop: 10,marginLeft: 20 }}>
+                           Để đăng ký tài khoản, bạn đồng ý</Text>
+
+                    </View>     
+                    <TouchableOpacity onPress={() => {}}>
+                            <Text style={{ color: "green",textDecorationLine: 'underline', marginLeft: 100 }}> Tems & Conditions and Privacy Policy</Text>
+                        </TouchableOpacity>
 
                     <TouchableOpacity
                         onPress={() => handelRegister()}
                         style={st.khungButton}
                     >
-                        <Text style={{ color: "white", textAlign: 'center', fontSize: 20, fontWeight: 'bold' }}>Register</Text>
+                        <Text style={{ color: "white", textAlign: 'center', fontSize: 20, fontWeight: 'bold' }}>Đăng ký</Text>
                     </TouchableOpacity>
+
+                    <View style={st.container}>
+                        <View style={st.line}></View>
+                        <Text style={st.text}>Hoặc</Text>
+                        <View style={st.line}></View>
+                    </View>
+
+
+
+
+                    {/* // Button Google */}
+
+
+
+                    <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+                        <TouchableOpacity
+                        >
+                            <Image
+                                source={require('../img/icon_google.png')}
+                                style={{ width: 30, height: 30 }}
+                            />
+
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                        >
+                            <Image
+                                source={require('../img/icon_facebook.png')}
+                                style={{ width: 30, height: 30, marginLeft: 30 }}
+                            />
+
+                        </TouchableOpacity>
+                    </View>
+
 
                     <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'center' }}>
                         <Text style={{ color: "gray", fontWeight: 'bold', textAlign: 'center', marginTop: 15 }}>
-                            You have an account? Click</Text>
+                            Tôi đã có tài khoản </Text>
 
                         <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-                            <Text style={{ color: "orange", fontWeight: 'bold', marginTop: 15 }}> Sign in</Text>
+                            <Text style={{ color: "green", fontWeight: 'bold', marginTop: 15 }}>Đăng nhập</Text>
                         </TouchableOpacity>
 
 
@@ -226,14 +268,26 @@ const Register = ({ navigation }) => {
 export default Register
 
 const st = StyleSheet.create({
-    background: { ...StyleSheet.absoluteFillObject, backgroundColor: "black" },
-    welcom: { fontSize: 30, textAlign: "center", color: "white", fontWeight: 'bold' },
-    welcom2: { fontSize: 20, textAlign: "center", color: "gray", marginTop: 20, fontWeight: 'bold' },
-    khung: {
-        borderColor: "orange", borderWidth: 1, borderRadius: 10, padding: 15, margin: 20
-        , color: "white", fontSize: 20
-    },
-    khungButton: { backgroundColor: "#D2691E", borderWidth: 1, borderRadius: 25, padding: 15, margin: 15 },
-    khungButton1: { backgroundColor: "#FFFFFF", borderWidth: 1, borderRadius: 25, padding: 15, margin: 15 },
+    background: { ...StyleSheet.absoluteFillObject, backgroundColor: "white" },
+    welcom: { fontSize: 30, textAlign: "center", color: "black", fontWeight: 'bold' },
+    welcom2: { fontSize: 18, textAlign: "center", color: "black", marginTop: 10, },
+    khung: { borderColor: "#C0C0C0", borderWidth: 1, borderRadius: 10, padding: 10, marginHorizontal: 20, marginVertical: 10, color: "white", fontSize: 18 },
+    khungButton: { backgroundColor: "#007537", borderWidth: 1, borderRadius: 20, padding: 15, margin: 15 },
+    khungButton1: { backgroundColor: "#FFFFFF", borderWidth: 1, borderRadius: 25, padding: 15, margin: 15, marginTop: 5 },
+    container: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginHorizontal: 20,
+        marginBottom: 10
 
+      },
+      line: {
+        flex: 1,
+        height: 1.5,
+        backgroundColor: 'green',
+      },
+      text: {
+        marginHorizontal: 10,
+      },
 })

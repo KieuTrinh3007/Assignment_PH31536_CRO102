@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, SafeAreaView, Image, TouchableOpacity, TextInput, KeyboardAvoidingView, ScrollView } from 'react-native'
+import { StyleSheet, Text, View, SafeAreaView, Image, TouchableOpacity, TextInput, KeyboardAvoidingView, ScrollView, ToastAndroid } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { URL } from './HomeScreen';
@@ -8,17 +8,9 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
     const initialEmail = route.params?.email || '';
     const [username, setusername] = useState(initialUsername);
     const [email, setemail] = useState(initialEmail);
-    const [password, setpassword] = useState('');
-    const [repassword, setrepassword] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
-    const [showRePassword, setShowRePassword] = useState(false);
-    const toggleShowPassword = () => {
-        setShowPassword(!showPassword);
-    };
-
-    const toggleShowRePassword = () => {
-        setShowRePassword(!showRePassword);
-    };
+    const [diachi, setDiaChi] = useState('');
+    const [phone, setPhone] = useState("");
+    
 
     const [showErrors, setshowErrors] = useState(false);
     const [errors, seterrors] = useState({});
@@ -31,6 +23,7 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
                 if (username !== null && email !== null) {
                     setusername(username);
                     setemail(email);
+                   
                 }
             } catch (e) {
                 console.log(e);
@@ -40,8 +33,12 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
         getLoginInfo();
     }, []);
 
-    const getErrors = (email, username, password, repassword) => {
+    
+    const getErrors = (email, username, diachi, phone) => {
         const errors = {};
+
+        
+
         if (!email) {
             errors.email = "Vui lòng nhập Email"
         } else if (!email.includes('@') || !email.includes('.')) {
@@ -54,24 +51,30 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
             errors.username = "Username phải có tối thiểu 6 ký tư"
         }
 
-        if (!password) {
-            errors.password = "Vui lòng nhập Password"
-        } else if (password.length < 6) {
-            errors.password = "Password phải có tối thiểu 6 ký tự"
+    
+
+        if (!diachi) {
+            errors.diachi = "Vui lòng nhập địa chỉ"
         }
 
-        if (!repassword) {
-            errors.repassword = "Nhập lại Password"
-        } else if (repassword.length < 6) {
-            errors.repassword = "Password phải có tối thiểu 6 ký tự"
-        } else if (password !== repassword) {
-            errors.repassword = 'Password không khớp'
+        if (!phone) {
+            errors.phone = "Vui lòng nhập số điện thoại"
+        } else if (phone.length !== 10) {
+            errors.phone = "Số điện thoại phải có 10 số"
+        } else if (isNaN(phone)) {
+            errors.phone = 'Số điện thoại phải là số'
 
         }
         return errors;
     }
+
+    
+
+
     const handelSave = async () => {
-        const errors = getErrors(email, username, password, repassword);
+        const errors = getErrors(email, username, diachi, phone);
+
+    
         if (Object.keys(errors).length > 0) {
             setshowErrors(true)
             seterrors(errors)
@@ -81,14 +84,13 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
             const dataUser = await responseUser.json();
             const emailStorage = await AsyncStorage.getItem('email');
             const indexUser = dataUser.findIndex(item => item.email === emailStorage);
-            console.log('data user ====',dataUser, indexUser)
             if(indexUser !== -1){
                 const response = await fetch(`${URL}/users/${dataUser[indexUser].id}`, {
                     method: 'PATCH',
                     body: JSON.stringify({
                         username: username,
                         email: email,
-                        password: password,
+                        
                     }),
                     headers: {
                         'Content-type': 'application/json; charset=UTF-8',
@@ -99,7 +101,7 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
                 if (result.id) {
                     seterrors({});
                     setshowErrors(false);
-                    console.log('Đăng ký thành công');
+                    ToastAndroid.show('Thay thông tin thành công', ToastAndroid.SHORT);
                     navigation.goBack();
                 }
             }
@@ -108,6 +110,7 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
             // Lưu thông tin đăng nhập vào AsyncStorage
             await AsyncStorage.setItem('username', username);
             await AsyncStorage.setItem('email', email);
+            
         } catch (e) {
             console.log(e);
         }
@@ -115,7 +118,7 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
     }
 
     return (
-        <SafeAreaView style={{ backgroundColor: "black", ...StyleSheet.absoluteFillObject }}>
+        <SafeAreaView style={{ backgroundColor: "white", ...StyleSheet.absoluteFillObject }}>
   <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}>
@@ -133,7 +136,7 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
                     </TouchableOpacity>
 
                     <View>
-                        <Text style={styles.cart}>Personal Details</Text>
+                        <Text style={styles.cart}>Chỉnh sửa thông tin</Text>
                     </View>
 
                 </View>
@@ -144,18 +147,22 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
 
 
                     <Image
-                        source={require('../img/info.png')}
+                        source={require('../img/avatar.png')}
                         style={{ width: 150, height: 150, alignSelf: 'center', margin: 20 }}
                         resizeMode="cover"
                     />
 
                 </View>
 
+                <Text style = {{color: 'black', alignSelf: 'center', fontSize: 17}}>Thông tin sẽ được lưu cho lần mua kế tiếp.</Text>
+                <Text style = {{color: 'black', alignSelf: 'center', fontSize: 17}}>Bấm vào thông tin chi tiết để chỉnh sửa.</Text>
+
+
                 <TextInput
                     style={styles.khung}
                     value={username}
                     onChangeText={(txt) => { setusername(txt) }}
-                    placeholder="Username"
+                    placeholder="Nhập họ tên"
                     placeholderTextColor="gray"
 
 
@@ -182,71 +189,60 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
                     </Text>
                 )}
 
+
+                
+
                 <View>
                     <TextInput
                         style={styles.khung}
-                        value={password}
-                        onChangeText={(txt) => { setpassword(txt) }}
-                        placeholder="Password"
+                        value={diachi}
+                        onChangeText={(txt) => { setDiaChi(txt) }}
+                        placeholder="Nhập địa chỉ"
                         placeholderTextColor="gray"
-                        secureTextEntry={!showPassword}
+                        
 
                     />
-                    {errors.password && (
+                    {errors.diachi && (
                         <Text style={{ fontSize: 16, color: 'red', marginLeft: 20 }}>
-                            {errors.password}
+                            {errors.diachi}
                         </Text>
                     )}
 
-                    <TouchableOpacity
-                        onPress={toggleShowPassword}
-                        style={{ position: 'absolute', right: 40, top: 40 }}
-                    >
-                        <Image
-                            source={showPassword ? require('../img/eye.png') : require('../img/eye1.png')}
-                            style={{ width: 24, height: 24, tintColor: 'white' }}
-                        />
-                    </TouchableOpacity>
+                
                 </View>
 
                 <View>
                     <TextInput
                         style={styles.khung}
-                        value={repassword}
-                        onChangeText={(txt) => { setrepassword(txt) }}
-                        placeholder="Re-Password"
+                        value={phone}
+                        onChangeText={(txt) => { setPhone(txt) }}
+                        placeholder="Nhập số điện thoại"
                         placeholderTextColor="gray"
-                        secureTextEntry={!showRePassword}
+                        
 
                     />
-                    {errors.repassword && (
+                    {errors.phone && (
                         <Text style={{ fontSize: 16, color: 'red', marginLeft: 20 }}>
-                            {errors.repassword}
+                            {errors.phone}
                         </Text>
                     )}
 
-                    <TouchableOpacity
-                        onPress={toggleShowRePassword}
-                        style={{ position: 'absolute', right: 40, top: 40 }}
-                    >
-                        <Image
-                            source={showRePassword ? require('../img/eye.png') : require('../img/eye1.png')}
-                            style={{ width: 24, height: 24, tintColor: 'white' }}
-                        />
-                    </TouchableOpacity>
                 </View>
 
-
-            </ScrollView>
-            </KeyboardAvoidingView>
-
-            <TouchableOpacity
+                <TouchableOpacity
                 onPress={() => handelSave()}
                 style={styles.khungButton}
 
             >
-                <Text style={{ color: "white", textAlign: 'center', fontSize: 20, fontWeight: 'bold' }}>Save</Text>
+                <Text style={{ color: "white", textAlign: 'center', fontSize: 20, fontWeight: 'bold' }}>Lưu thông tin</Text>
             </TouchableOpacity>
+
+
+            </ScrollView>
+
+            </KeyboardAvoidingView>
+
+           
 
 
         </SafeAreaView>
@@ -268,18 +264,18 @@ const styles = StyleSheet.create({
         color: "white",
     },
     khung: {
-        borderColor: "orange",
+        borderColor: "gray",
         borderWidth: 1,
-        borderRadius: 10,
-        padding: 20,
+        borderRadius: 5,
+        padding: 10,
         margin: 20,
         color: "white",
         fontSize: 20
     },
     khungButton: {
-        backgroundColor: "#D2691E",
+        backgroundColor: "green",
         borderWidth: 1,
-        borderRadius: 25,
+        borderRadius: 10,
         padding: 15,
         margin: 15
     },

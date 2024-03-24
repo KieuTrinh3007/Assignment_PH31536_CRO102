@@ -2,11 +2,10 @@ import React from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import HomeScreen from '../screens/HomeScreen'
-import CartScreen from '../screens/CartScreen'
-import FavoritesScreen from '../screens/FavoritesScreen'
-import ContactScreen from '../screens/ContactScreen'
 import { Image } from 'react-native'
-import OrderHistoryScreen from '../screens/OrderHistoryScreen'
+import SearchScreen from '../screens/SearchScreen'
+import NotificationScreen from '../screens/NotificationScreen'
+import ProfileScreen from '../screens/ProfileScreen'
 
 
 const Tab = createBottomTabNavigator();
@@ -25,15 +24,14 @@ const TabNavigator = () => {
 
                 if (route.name  === "Home") {
                     iconName = focused ? require('../img/home.png'): require('../img/home.png');
-                } else if (route.name === "Cart") {
-                    iconName = focused ? require('../img/cart.png'): require('../img/cart.png');
-                } else if (route.name  === "Favorite") {
-                    iconName = focused ? require('../img/heart.png'): require('../img/heart.png');
-                } else if (route.name  === "OrderHistoryScreen") {
+                } else if (route.name === "Search") {
+                    iconName = focused ? require('../img/search.png'): require('../img/search.png');
+                } else if (route.name  === "NotificationScreen") {
                     iconName = focused ? require('../img/bell.png'): require('../img/bell.png');
+                } else if (route.name  === "Profile") {
+                    iconName = focused ? require('../img/man.png'): require('../img/man.png');
                 }
                 
-                // return <Icon name={iconName} size={22} color={color} />
                 return (
                     <Image
                         source={iconName}
@@ -47,11 +45,11 @@ const TabNavigator = () => {
         >
             <Tab.Screen name="Home" component={HomeScreen}></Tab.Screen>
 
-            <Tab.Screen name="Cart" component={CartScreen}></Tab.Screen>
+            <Tab.Screen name="Search" component={SearchScreen}></Tab.Screen>
 
-            <Tab.Screen name="Favorite" component={FavoritesScreen}></Tab.Screen>
+            <Tab.Screen name="NotificationScreen" component={NotificationScreen}></Tab.Screen>
 
-            <Tab.Screen name="OrderHistoryScreen" component={OrderHistoryScreen}></Tab.Screen>
+            <Tab.Screen name="Profile" component={ProfileScreen}></Tab.Screen>
 
         </Tab.Navigator>
     )
@@ -62,7 +60,7 @@ export default TabNavigator
 const styles = StyleSheet.create({
     tabBarStyle: {
         height: 55,      
-        backgroundColor: "black",
+        backgroundColor: "white",
         borderTopWidth: 0,
         position: 'relative',
         elevation: 0,

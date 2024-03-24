@@ -1,141 +1,166 @@
-import { SafeAreaView, StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native'
+import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView, TextInput } from 'react-native'
 import React, { useState } from 'react'
-import { URL } from './HomeScreen';
 
-const PaymentScreen = ({route,navigation}) => {
-  const {totalPrice, data} = route.params;
-  const [payments, setPayments] = useState([
-    {title: 'Wallet', image: require('../img/wallet.png'), highlight: false, subTitle: '$ 100.5' },
-    {title: 'Google Payt', image: require('../img/ggpay.png'), highlight: false }, 
-  {title: 'Apple Pay', image: require('../img/applepay.png'), highlight: false }, 
-  {title: 'Amazon Pay', image: require('../img/amazonpay.png'), highlight: false }])
-
-  const onPayment = async () => {
-    const resopnseCart = await fetch(`${URL}/carts`);
-    const dataCart = await resopnseCart.json();
-    const listIdCart = dataCart.map(item => item.id);
-    if(listIdCart.length){
-      for (let i = 0; i < listIdCart.length; i++) {
-        const id = listIdCart[i];
-        await fetch(`${URL}/carts/${id}`, {method: 'DELETE'})
-      }
-    }
-    for (let i = 0; i < data.length; i++) {
-      const element = data[i];
-      let totalPrice = 0;
-      for (let j = 0; j < element.giaSP.length; j++) {
-        const {price, size} = element.giaSP[j];
-        totalPrice += (Number(price) * (element.data[size] || 0))
-      }
-      if(totalPrice){
-        await fetch(`${URL}/orders`, {
-          method: 'POST',
-          body: JSON.stringify({
-            idSP: element.idSP,
-            createAt: Date.now()+"",
-            data: element.data,
-            totalPrice: Number(totalPrice.toFixed(2))
-          })
-        })
-      }
-    }
-   
-  }
-
-
+const PaymentScreen = ({ navigation }) => {
+  const [name, setName] = useState('Phạm Kiều Trinh');
+  const [email, setEmail] = useState('trinhpkph31536@fpt.edu.vn');
+  const [sdt, setSdt] = useState('');
+  const [address, setAddress] = useState('');
+  const [selectedShippingMethod, setSelectedShippingMethod] = useState(null);
+  const [selectedPay, setSelectedPay] = useState(null);
 
   return (
-   <SafeAreaView style={{ backgroundColor: "black", ...StyleSheet.absoluteFillObject }}>
+    <View>
+      <View style={styles.headerBar}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <View>
+            <Image
+              source={require('../img/back1.png')}
+              style={{ width: 25, height: 25 }}
+              resizeMode="cover"
+            />
+          </View>
+        </TouchableOpacity>
+        <Text style={styles.cart}>Thanh toán</Text>
+      </View>
 
-<View>
-        <View style={styles.headerBar}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <View style={{ marginLeft: 20, marginTop: 20 }}>
-              <Image
-                source={require('../img/back1.png')}
-                style={{width: 15, height: 20}}
-                resizeMode="cover"
-              />
+      <View style={{ marginHorizontal: 20 }}>
+        {/* Thông tin khách hàng */}
+
+        <ScrollView>
+          <Text style={{ color: 'black', fontSize: 20, fontWeight: 'normal' }}>Thông tin khách hàng</Text>
+          <View style={{ borderBottomColor: 'gray', borderBottomWidth: 1, marginTop: 5 }} />
+
+          <TextInput
+            style={styles.text}
+            value={name}
+            onChangeText={(txt) => { setName(txt) }}
+            placeholder="Họ và tên"
+            placeholderTextColor="gray"
+          />
+          <View style={{ borderBottomColor: 'gray', borderBottomWidth: 1 }} />
+
+          <TextInput
+            style={styles.text}
+            value={email}
+            onChangeText={(txt) => { setEmail(txt) }}
+            placeholder="Họ và tên"
+            placeholderTextColor="gray"
+          />
+          <View style={{ borderBottomColor: 'gray', borderBottomWidth: 1 }} />
+
+          <TextInput
+            style={styles.text}
+            value={sdt}
+            onChangeText={(txt) => { setSdt(txt) }}
+            placeholder="Số điện thoại"
+            placeholderTextColor="gray"
+          />
+          <View style={{ borderBottomColor: 'gray', borderBottomWidth: 1 }} />
+
+          <TextInput
+            style={styles.text}
+            value={address}
+            onChangeText={(txt) => { setAddress(txt) }}
+            placeholder="Địa chỉ"
+            placeholderTextColor="gray"
+          />
+          <View style={{ borderBottomColor: 'gray', borderBottomWidth: 1 }} />
+
+          {/* Phương thức vận chuyển */}
+          <Text style={{ color: 'black', fontSize: 20, fontWeight: 'normal', marginTop: 20 }}>Phương thức vận chuyển</Text>
+          <View style={{ borderBottomColor: 'gray', borderBottomWidth: 1, marginTop: 5 }} />
+
+          <TouchableOpacity onPress={() => setSelectedShippingMethod('fast')}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text
+                style={[styles.shippingMethod, selectedShippingMethod === 'fast' && styles.selectedShippingMethod]}>
+                Giao hàng nhanh - 15.000đ
+              </Text>
+              {selectedShippingMethod === 'fast' && <Image source={require('../img/check.png')} style={{ marginLeft: 120, width: 30, height: 30, top: 20 }} />}
             </View>
           </TouchableOpacity>
 
-          <View>
-            <Text style={styles.cart}>Payment</Text>
-          </View>
+          <Text style={{ color: 'gray', fontSize: 18, fontWeight: 'normal', }}>Dự kiến giao hàng 10-15/3</Text>
 
+
+          <View style={{ borderBottomColor: 'gray', borderBottomWidth: 1, marginTop: 5 }} />
+
+          <TouchableOpacity onPress={() => setSelectedShippingMethod('COD')}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text
+                style={[styles.shippingMethod, selectedShippingMethod === 'COD' && styles.selectedShippingMethod]}>
+                Giao hàng COD - 20.000đ
+              </Text>
+              {selectedShippingMethod === 'COD' && <Image source={require('../img/check.png')} style={{ marginLeft: 120, width: 30, height: 30, top: 20 }} />}
+            </View>
+          </TouchableOpacity>
+
+          <Text style={{ color: 'gray', fontSize: 18, fontWeight: 'normal', }}>Dự kiến giao hàng 8-10/3</Text>
+          <View style={{ borderBottomColor: 'gray', borderBottomWidth: 1 }} />
+          {/* Hình thức thanh toán */}
+
+          <Text style={{ color: 'black', fontSize: 20, fontWeight: 'normal', marginTop: 20 }}>Hình thức thanh toán</Text>
+          <View style={{ borderBottomColor: 'gray', borderBottomWidth: 1, marginTop: 5 }} />
+
+          <TouchableOpacity onPress={() => setSelectedPay('VISA')}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text
+                style={[styles.shippingMethod, selectedPay === 'VISA' && styles.selectedShippingMethod]}>
+                Thẻ VISA/MASTERCREDIT
+              </Text>
+              {selectedPay === 'VISA' && <Image source={require('../img/check.png')} style={{ marginLeft: 120, width: 30, height: 30, top: 10 }} />}
+            </View>
+          </TouchableOpacity>
+
+
+          <View style={{ borderBottomColor: 'gray', borderBottomWidth: 1, marginTop: 5 }} />
+
+          <TouchableOpacity onPress={() => setSelectedPay('ATM')}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text
+                style={[styles.shippingMethod, selectedPay === 'ATM' && styles.selectedShippingMethod]}>
+                Thẻ ATM
+              </Text>
+              {selectedPay === 'ATM' && <Image source={require('../img/check.png')} style={{ marginLeft: 250, width: 30, height: 30, top: 20 }} />}
+            </View>
+          </TouchableOpacity>
+
+        </ScrollView>
+      </View>
+
+
+      {/* Thanh toán */}
+
+      <View>
+
+
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 30, marginHorizontal: 20 }}>
+
+          <Text style={{ color: 'gray', fontSize: 18, fontWeight: 'normal' }}>Tạm tính</Text>
+          <Text style={{ color: 'black', fontSize: 18, fontWeight: 'normal' }}>500.000</Text>
         </View>
 
-        <View style = {{borderRadius: 10, borderColor: 'orange', borderWidth: 1, margin: 10, paddingVertical: 10}}>
-          <Text style = {{color: 'white', marginHorizontal: 10, fontWeight: 'bold', marginBottom: 10}}>Credit Card</Text>
-          <View style = {{borderRadius: 20, backgroundColor: '#262B33' ,borderWidth: 1, marginHorizontal: 10,height: 200}}>
-            <View style = {{flexDirection: 'row', justifyContent: 'space-between'}}>
-              <Image
-              source={require('../img/chip.png')}
-              style = {{margin: 15}}
-              />
-               <Image
-              source={require('../img/visa.png')}
-              style = {{margin: 10, height: 15, width: 50}}
-              />
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: 20 }}>
 
-            </View>
-           
-            <Text style = {{color: 'white',  fontWeight: 'bold', fontSize: 18 , marginTop: 30, marginLeft: 5}}> 3 0 0 7   2 0 0 4    1 4 0 6    2 0 0 4 </Text>
-           
-            
-            <View style = {{flexDirection: 'row', justifyContent: 'space-between', margin: 5}}>
-            <Text style = {{color: 'gray',marginTop: 30}}> Card Holder Name </Text>
-            <Text style = {{color: 'gray',marginTop: 30}}> Expiry Date</Text>
-            </View>
-           
-            <View style = {{flexDirection: 'row', justifyContent: 'space-between', margin: 5}}>
-            <Text style = {{color: 'white', fontWeight: 'bold', fontSize: 18,}}> Rine </Text>
-            <Text style = {{color: 'white', fontWeight: 'bold', fontSize: 18,}}> 02/30 </Text>
-
-            </View>
-          </View>
-
+          <Text style={{ color: 'gray', fontSize: 18, fontWeight: 'normal' }}>Phí vận chuyển</Text>
+          <Text style={{ color: 'black', fontSize: 18, fontWeight: 'normal' }}>15.000</Text>
         </View>
 
-        {payments.map((item, index) => {
-          return  <TouchableOpacity onPress={() => {
-            for (let i = 0; i < payments.length; i++) {
-              payments[i].highlight = false;
-            
-            }
-            payments[index].highlight = true;
-            setPayments([...payments])
-          }} key={item.title} style = {[styles.khung, {backgroundColor: item.highlight ? 'orange' : 'black'}]}>
-          <View style = {styles.press}>
-            <Image
-            source={item.image}
-            />
-            <Text style = {styles.textPayment}>{item.title}</Text>
-            {item.subTitle ? <Text style = {{marginLeft: 230, color: 'white', fontSize: 15}}>{item.subTitle}</Text> : null}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: 20 }}>
 
-          </View>
+          <Text style={{ color: 'gray', fontSize: 20, fontWeight: 'normal' }}>Tổng cộng</Text>
+          <Text style={{ color: 'green', fontSize: 18, fontWeight: 'normal' }}>515.000</Text>
+        </View>
 
+        <TouchableOpacity onPress={() => navigation.navigate("BankCardScreen")}
+          style={{ backgroundColor: "green", width: '95%', margin: 10, borderRadius: 10 }}>
+          <Text style={{ color: 'white', textAlign: 'center', fontSize: 20, padding: 10, fontWeight: 'bold' }}>Tiếp tục </Text>
         </TouchableOpacity>
-        })}
-
-       
 
       </View>
+    </View>
 
-      <View style = {{flexDirection: 'row', position: 'absolute', top: 650, backgroundColor: 'black', width: '100%', height: 70}}>
-        <View>
-        <Text style = {{color: 'white', marginLeft: 10,marginTop: 10, fontSize: 15}}>Total Price</Text>
-        <Text style = {{color: 'white', marginLeft: 10, fontSize: 25, fontWeight: 'bold'}}>$ {totalPrice}</Text>
-      </View>
-      <TouchableOpacity onPress={ async() => {
-        await onPayment();
-        navigation.navigate('OrderHistoryScreen')
-      }}
-      style = {{backgroundColor: "orange", width: '55%',justifyContent: 'center', alignItems: 'center', marginLeft: 80, margin: 10, borderRadius: 15}}>
-          <Text style = {{color: 'white', textAlign: 'center', fontSize: 19,fontWeight: 'bold'}}>Pay from Credit Card</Text>
-      </TouchableOpacity>
-      </View>
-   </SafeAreaView>
   )
 }
 
@@ -145,37 +170,28 @@ const styles = StyleSheet.create({
   headerBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    margin: 20
   },
   cart: {
     fontWeight: 'bold',
     fontSize: 22,
-    marginLeft: 150,
-    top: 10,
-    color: "white",
+    textAlign: 'center',
+    color: "black",
+    marginTop: 5,
+    marginLeft: 130
   },
-  khung: {
-    borderColor: 'gray',
-    borderWidth: 0.5,
-    borderRadius: 30,
-    marginHorizontal: 10,
-    backgroundColor: 'black',
-    marginTop: 10,
+  text: {
+    fontSize: 16,
+    marginTop: 5,
   },
-  press:{
-    flexDirection: 'row',
-    padding: 10,
-    top: 3,
-    left: 10,
-   
-  
-  },
-  textPayment: {
-    color: 'white',
-    marginLeft: 10,
-    fontWeight: 'bold',
+  shippingMethod: {
+    color: 'gray',
     fontSize: 18,
-    bottom: 5
-  }
-  
+    fontWeight: 'normal',
+    marginTop: 15,
+  },
+  selectedShippingMethod: {
+    color: 'green',
+    fontWeight: 'bold',
+  },
 })

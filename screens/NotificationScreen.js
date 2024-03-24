@@ -5,7 +5,7 @@ import { URL } from './HomeScreen';
 import { useFocusEffect } from '@react-navigation/native';
 
 
-const OrderHistoryScreen = ({ navigation, route }) => {
+const NotificationScreen = ({ navigation, route }) => {
 
   const [listOrder, setListOrder] = useState([]);
 
@@ -61,73 +61,36 @@ const OrderHistoryScreen = ({ navigation, route }) => {
           <View style = {{flexDirection: 'row', justifyContent: 'space-between', margin: 20}}>
             
             <View>
-            <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 20 }}>Order Date</Text>
             <Text style={{ color: 'black', fontSize: 16, top: 5, }}>{createAt.getDate()+"/"+(createAt.getMonth()+1)+"/"+createAt.getFullYear()}</Text>
             </View> 
+            
             <View>
-            <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 20 }}>Total Amount</Text>
-            <Text style={{ color: 'green',  fontSize: 16, top: 5, left: 50 }}>$ {getTotalAmount(item.createAt)}</Text>
-
             </View> 
+            
           </View> : null }
+
+          
          
           <View style={styles.cartCard}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+            <View style={{ flexDirection: 'row'}}>
               <Image source={{ uri: item.linkAnh }} style={{ height: 90, width: 90, borderRadius: 10, }} />
               <View>
 
-                <Text style = {{color : 'green'}}>Đặt hàng thành công</Text>
+                <Text style = {{color : 'green',marginLeft: 20}}>Đặt hàng thành công</Text>
                 <View style = {{flexDirection: 'row'}}>
     
-                <Text style={{ fontWeight: 'bold', fontSize: 16, color: 'black',}}>{item.tenSP}|</Text>
+                <Text style={{ fontWeight: 'bold', fontSize: 16, color: 'black',marginLeft: 20}}>{item.tenSP}|</Text>
                 <Text style={{fontSize: 14, color: 'gray', marginLeft: 3, top: 2}}>{item.phanLoai}</Text>
 
                 </View>
-                <Text style={{ fontSize: 14, color: 'gray'}}>
-                  {item.loaiSP}
+                <Text style={{ fontSize: 14, color: 'black',marginLeft: 20}}>
+                  2 sản phẩm
                 </Text>
               </View>
 
-              <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 25,}}>$ {item.totalPrice.toFixed(2)}</Text>
+              
             </View>
 
-            <View>
-
-              {item.giaSP && item.giaSP.map(option => {
-                return (item.data[option.size] && Number(item.data[option.size])) ? <Text
-                  key={option.giaSP}
-                  onPress={() => handleSizeSelection(option)}
-
-                >
-                  <View style={{ flexDirection: 'row' }}>
-                    <Text style={{
-                      color: 'white', 
-                      paddingVertical: 10,
-                      paddingHorizontal: 20,
-                      borderRadius: 10,
-                      marginTop: 20,
-                      fontSize: 15,
-                      fontWeight: 'bold',
-                      backgroundColor: 'black',
-                    }}
-                    >
-                      {option.size}</Text>
-
-                    <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 20, top: 25, left: 20 }}> $ {option.price}</Text>
-                    <Text style={{ color: 'green', fontWeight: 'bold', fontSize: 20, top: 25, left: 70  }}>X</Text>
-                    <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 19, top: 25, left: 75  }}>{item.data[option.size]}</Text>
-                    <Text style={{ color: 'orange', fontWeight: 'bold', fontSize: 19, top: 25, left: 130 }}>{(Number(item.data[option.size]) * option.price).toFixed(2)}</Text>
-                   
-                  </View>
-
-                
-
-
-                </Text> : null
-
-              })}
-
-            </View>
           </View>
         </View>
       </View>
@@ -153,7 +116,7 @@ const OrderHistoryScreen = ({ navigation, route }) => {
           </TouchableOpacity>
 
           <View>
-            <Text style={styles.cart}>Order History</Text>
+            <Text style={styles.cart}>Thông báo</Text>
           </View>
 
         </View>
@@ -169,7 +132,7 @@ const OrderHistoryScreen = ({ navigation, route }) => {
   )
 }
 
-export default OrderHistoryScreen
+export default NotificationScreen
 
 const styles = StyleSheet.create({
   headerBar: {
