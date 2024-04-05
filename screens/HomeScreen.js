@@ -52,13 +52,15 @@ const HomeScreen = ({ navigation }) => {
     return (
         <SafeAreaView style={{ backgroundColor: "white", ...StyleSheet.absoluteFillObject }}>
 
-            <View style={styles.headerBar}>
+            
+        <View style={styles.headerBar}>
 
                 <ImageBackground
                     source={require('../img/tree.png')}
                     style={{ width: '100%', height: 350 }}
                 >
-
+                    
+                       
                     <TouchableOpacity onPress={() => navigation.navigate('CartScreen')}>
 
                         <View style={styles.ImageContainer}>
@@ -73,20 +75,17 @@ const HomeScreen = ({ navigation }) => {
                         </View>
                     </TouchableOpacity>
 
-
+                   
 
                     <Text style={{ color: "black", fontSize: 28, marginLeft: 20 }}>Plan - toả sáng {'\n'}không gian nhà bạn</Text>
-                    <TouchableOpacity style={{ margin: 20, }}
-                        onPress={() => navigation.navigate('ListScreen')}>
-                        <Text style={{ color: 'green', fontSize: 18 }}>Xem hàng mới về  </Text>
-                    </TouchableOpacity>
+                    
                 </ImageBackground>
 
             </View>
 
 
-
-            <ScrollView style={{ marginTop: 30 }}>
+<ScrollView>
+        
                 {section.filter(item => !item.hide)
                     .map((element) => {
                         const list = danhSach.filter(obj => obj.loaiSP === element.title);
@@ -147,7 +146,7 @@ const HomeScreen = ({ navigation }) => {
                         )
                     })}
 
-            </ScrollView>
+</ScrollView>
         </SafeAreaView>
     );
 };

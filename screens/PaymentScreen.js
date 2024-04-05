@@ -1,16 +1,156 @@
 import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView, TextInput } from 'react-native'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { URL } from './HomeScreen';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-const PaymentScreen = ({ navigation }) => {
-  const [name, setName] = useState('Phạm Kiều Trinh');
-  const [email, setEmail] = useState('trinhpkph31536@fpt.edu.vn');
+const PaymentScreen = ({ navigation, route }) => {
+  const { totalPrice, data } = route.params;
+  const initialUsername = route.params?.username || '';
+  const initialEmail = route.params?.email || '';
+  const [username, setusername] = useState(initialUsername);
+  const [email, setEmail] = useState(initialEmail);
   const [sdt, setSdt] = useState('');
   const [address, setAddress] = useState('');
   const [selectedShippingMethod, setSelectedShippingMethod] = useState(null);
   const [selectedPay, setSelectedPay] = useState(null);
+  const [shippingFee, setShippingFee] = useState(0); // Giả sử phí vận chuyển là 15000
+  const total = parseFloat(totalPrice) + shippingFee;
+  const [showErrors, setshowErrors] = useState(false);
+  const [errors, seterrors] = useState({});
+
+  useEffect(() => {
+    const getLoginInfo = async () => {
+      try {
+        const username = await AsyncStorage.getItem('username');
+        const email = await AsyncStorage.getItem('email');
+        if (username !== null && email !== null) {
+          setusername(username);
+          setEmail(email);
+
+        } else {
+          // Nếu không tìm thấy email trong AsyncStorage, cập nhật email thành giá trị ban đầu
+          setEmail(initialEmail);
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    };
+
+    getLoginInfo();
+  }, []);
+
+  const onPayment = async () => {
+    const resopnseCart = await fetch(`${URL}/carts`);
+    const dataCart = await resopnseCart.json();
+    const listIdCart = dataCart.map(item => item.id);
+    if(listIdCart.length){
+      for (let i = 0; i < listIdCart.length; i++) {
+        const id = listIdCart[i];
+        await fetch(`${URL}/carts/${id}`, {method: 'DELETE'})
+      }
+    }
+    for (let i = 0; i < data.length; i++) {
+      const element = data[i];
+      let totalPrice = 0;
+      for (let j = 0; j < element.giaSP.length; j++) {
+        const {price, size} = element.giaSP[j];
+        totalPrice += (Number(price) * (element.data[size] || 0))
+      }
+      if(totalPrice){
+        await fetch(`${URL}/orders`, {
+          method: 'POST',
+          body: JSON.stringify({
+            idSP: element.idSP,
+            createAt: Date.now()+"",
+            data: element.data,
+            totalPrice: Number(totalPrice.toFixed(2))
+          })
+        })
+      }
+    }
+   
+  }
+
+  const getErrors = (email, username, sdt, address) => {
+    const errors = {};
+
+    if (!email) {
+      errors.email = "Vui lòng nhập Email"
+    } else if (!email.includes('@') || !email.includes('.')) {
+      errors.email = "Email không hợp lệ";
+    }
+
+    if (!username) {
+      errors.username = "Vui lòng nhập Username"
+    } else if (username.length < 6) {
+      errors.username = "Username phải có tối thiểu 6 ký tự"
+    }
+
+    if (!sdt) {
+      errors.sdt = "Vui lòng nhập số điện thoại"
+    } else if (sdt.length > 10) {
+      errors.sdt = "Số điện thoại chỉ chứa tối đa 10 ký tự"
+    }
+
+    if (!address) {
+      errors.address = "Vui lòng nhập địa chỉ"
+    }
+    return errors;
+  }
+
+
+
+  const handelSave = async () => {
+    const errors = getErrors(email, username, sdt,address,selectedShippingMethod,selectedPay);
+
+    if (Object.keys(errors).length > 0) {
+      setshowErrors(true)
+      seterrors(errors)
+      console.log(errors);
+    } else {
+      try {
+        const response = await fetch(`${URL}/customers`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({sdt, address })
+        });
+        
+        const data = await response.json();
+        console.log(data); // In ra thông báo từ server
+        navigation.navigate('BankCardScreen', {
+          onPayment: onPayment(),
+          customerInfo: {
+            username: username,
+            email: email,
+            sdt: sdt,
+            address: address
+          },
+          totalPrice: total.toFixed(2),
+          shippingMethod: selectedShippingMethod,
+          shippingFee: shippingFee ,
+          subtotal:totalPrice,
+        } );
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }
+    
+
+  const handleShippingMethodSelection = (method) => {
+    if (method === 'Giao hàng nhanh') {
+      setShippingFee(1); // Cập nhật phí vận chuyển cho giao hàng nhanh
+    } else if (method === 'Giao hàng COD') {
+      setShippingFee(1.5); // Cập nhật phí vận chuyển cho giao hàng COD
+    }
+  };
 
   return (
-    <View>
+    <SafeAreaView>
+      <ScrollView>
       <View style={styles.headerBar}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <View>
@@ -33,21 +173,31 @@ const PaymentScreen = ({ navigation }) => {
 
           <TextInput
             style={styles.text}
-            value={name}
-            onChangeText={(txt) => { setName(txt) }}
+            value={username}
+            onChangeText={(txt) => { setusername(txt) }}
             placeholder="Họ và tên"
             placeholderTextColor="gray"
           />
           <View style={{ borderBottomColor: 'gray', borderBottomWidth: 1 }} />
+          {showErrors && errors && errors.username && (
+            <Text style={{ fontSize: 16, color: 'red' }}>
+              {errors.username}
+            </Text>
+          )}
 
           <TextInput
             style={styles.text}
             value={email}
             onChangeText={(txt) => { setEmail(txt) }}
-            placeholder="Họ và tên"
+            placeholder="Email"
             placeholderTextColor="gray"
           />
           <View style={{ borderBottomColor: 'gray', borderBottomWidth: 1 }} />
+          {showErrors && errors && errors.email && (
+            <Text style={{ fontSize: 16, color: 'red' }}>
+              {errors.email}
+            </Text>
+          )}
 
           <TextInput
             style={styles.text}
@@ -57,7 +207,11 @@ const PaymentScreen = ({ navigation }) => {
             placeholderTextColor="gray"
           />
           <View style={{ borderBottomColor: 'gray', borderBottomWidth: 1 }} />
-
+          {showErrors && errors && errors.sdt && (
+            <Text style={{ fontSize: 16, color: 'red' }}>
+              {errors.sdt}
+            </Text>
+          )}
           <TextInput
             style={styles.text}
             value={address}
@@ -66,18 +220,22 @@ const PaymentScreen = ({ navigation }) => {
             placeholderTextColor="gray"
           />
           <View style={{ borderBottomColor: 'gray', borderBottomWidth: 1 }} />
-
+          {showErrors && errors && errors.address && (
+            <Text style={{ fontSize: 16, color: 'red' }}>
+              {errors.address}
+            </Text>
+          )}
           {/* Phương thức vận chuyển */}
           <Text style={{ color: 'black', fontSize: 20, fontWeight: 'normal', marginTop: 20 }}>Phương thức vận chuyển</Text>
           <View style={{ borderBottomColor: 'gray', borderBottomWidth: 1, marginTop: 5 }} />
 
-          <TouchableOpacity onPress={() => setSelectedShippingMethod('fast')}>
+          <TouchableOpacity onPress={() => { handleShippingMethodSelection('Giao hàng nhanh'); setSelectedShippingMethod('Giao hàng nhanh'); }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Text
-                style={[styles.shippingMethod, selectedShippingMethod === 'fast' && styles.selectedShippingMethod]}>
+                style={[styles.shippingMethod, selectedShippingMethod === 'Giao hàng nhanh' && styles.selectedShippingMethod]}>
                 Giao hàng nhanh - 15.000đ
               </Text>
-              {selectedShippingMethod === 'fast' && <Image source={require('../img/check.png')} style={{ marginLeft: 120, width: 30, height: 30, top: 20 }} />}
+              {selectedShippingMethod === 'Giao hàng nhanh' && <Image source={require('../img/check.png')} style={{ marginLeft: 120, width: 30, height: 30, top: 20 }} />}
             </View>
           </TouchableOpacity>
 
@@ -86,13 +244,13 @@ const PaymentScreen = ({ navigation }) => {
 
           <View style={{ borderBottomColor: 'gray', borderBottomWidth: 1, marginTop: 5 }} />
 
-          <TouchableOpacity onPress={() => setSelectedShippingMethod('COD')}>
+          <TouchableOpacity onPress={() => { handleShippingMethodSelection('Giao hàng COD'); setSelectedShippingMethod('Giao hàng COD'); }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Text
-                style={[styles.shippingMethod, selectedShippingMethod === 'COD' && styles.selectedShippingMethod]}>
+                style={[styles.shippingMethod, selectedShippingMethod === 'Giao hàng COD' && styles.selectedShippingMethod]}>
                 Giao hàng COD - 20.000đ
               </Text>
-              {selectedShippingMethod === 'COD' && <Image source={require('../img/check.png')} style={{ marginLeft: 120, width: 30, height: 30, top: 20 }} />}
+              {selectedShippingMethod === 'Giao hàng COD' && <Image source={require('../img/check.png')} style={{ marginLeft: 120, width: 30, height: 30, top: 20 }} />}
             </View>
           </TouchableOpacity>
 
@@ -138,28 +296,29 @@ const PaymentScreen = ({ navigation }) => {
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 30, marginHorizontal: 20 }}>
 
           <Text style={{ color: 'gray', fontSize: 18, fontWeight: 'normal' }}>Tạm tính</Text>
-          <Text style={{ color: 'black', fontSize: 18, fontWeight: 'normal' }}>500.000</Text>
+          <Text style={{ color: 'black', fontSize: 18, fontWeight: 'normal' }}>{totalPrice} $</Text>
         </View>
 
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: 20 }}>
 
           <Text style={{ color: 'gray', fontSize: 18, fontWeight: 'normal' }}>Phí vận chuyển</Text>
-          <Text style={{ color: 'black', fontSize: 18, fontWeight: 'normal' }}>15.000</Text>
+          <Text style={{ color: 'black', fontSize: 18, fontWeight: 'normal' }}>{shippingFee} $</Text>
         </View>
 
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: 20 }}>
 
           <Text style={{ color: 'gray', fontSize: 20, fontWeight: 'normal' }}>Tổng cộng</Text>
-          <Text style={{ color: 'green', fontSize: 18, fontWeight: 'normal' }}>515.000</Text>
+          <Text style={{ color: 'green', fontSize: 18, fontWeight: 'normal' }}>{total.toFixed(2)} $</Text>
         </View>
 
-        <TouchableOpacity onPress={() => navigation.navigate("BankCardScreen")}
+        <TouchableOpacity onPress={() => handelSave()}
           style={{ backgroundColor: "green", width: '95%', margin: 10, borderRadius: 10 }}>
           <Text style={{ color: 'white', textAlign: 'center', fontSize: 20, padding: 10, fontWeight: 'bold' }}>Tiếp tục </Text>
         </TouchableOpacity>
 
       </View>
-    </View>
+      </ScrollView>
+    </SafeAreaView>
 
   )
 }

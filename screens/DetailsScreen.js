@@ -18,12 +18,6 @@ const DetailsScreen = ({ navigation, route }) => {
   const [cart, setCart] = useState([]);
 
  
- 
- 
-
-
-
-
   // Hàm để cập nhật kích thước khi người dùng chọn
   const handleSizeSelection = (data) => {
     setSize(data.size);

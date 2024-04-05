@@ -7,8 +7,8 @@ import SearchScreen from '../screens/SearchScreen'
 import NotificationScreen from '../screens/NotificationScreen'
 import ProfileScreen from '../screens/ProfileScreen'
 
-
 const Tab = createBottomTabNavigator();
+
 
 const TabNavigator = () => {
     return (
@@ -43,6 +43,7 @@ const TabNavigator = () => {
         })}
 
         >
+            
             <Tab.Screen name="Home" component={HomeScreen}></Tab.Screen>
 
             <Tab.Screen name="Search" component={SearchScreen}></Tab.Screen>

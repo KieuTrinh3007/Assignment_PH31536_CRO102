@@ -1,16 +1,81 @@
-import { StyleSheet, Text, View,TextInput, TouchableOpacity, Image, ScrollView, Alert, ToastAndroid } from 'react-native'
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image, ScrollView, Alert, ToastAndroid } from 'react-native'
 import React, { useState } from 'react'
+import { URL } from './HomeScreen';
 
-const BankCardScreen = ({ navigation }) => {
+const BankCardScreen = ({ navigation, route }) => {
+  const { customerInfo,onPayment,totalPrice,subtotal,shippingFee, shippingMethod } = route.params;
+  const { username, email, sdt, address } = customerInfo;
+
   const [soThe, setSoThe] = useState('');
   const [chuThe, setChuThe] = useState('');
   const [ngay, setNgay] = useState('');
   const [CVV, setCVV] = useState('');
+  
+  const [errors, setErrors] = useState({});
+  const [showErrors, setShowErrors] = useState(false);
+
+  const getErrors = (soThe, chuThe, ngay, CVV) => {
+    const errors = {};
+
+    if (!soThe) {
+      errors.soThe = "Vui lòng nhập số thẻ"
+    } 
+
+    if (!chuThe) {
+      errors.chuThe = "Vui lòng nhập tên chủ thẻ"
+    } 
+
+    if (!ngay) {
+      errors.ngay = "Vui lòng nhập ngày hết hạn"
+    } 
+
+    if (!CVV) {
+      errors.CVV = "Vui lòng nhập CVV"
+    }
+
+    return errors;
+  }
+
+  const handleSave = async () => {
+    const errors = getErrors(soThe, chuThe, ngay, CVV);
+
+    if (Object.keys(errors).length > 0) {
+      setShowErrors(true);
+      setErrors(errors);
+    } else {
+      try {
+        const response = await fetch(`${URL}/payments`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            soThe,
+            chuThe,
+            ngay,
+            CVV,
+           
+          }),
+        });
+
+        // Process response accordingly
+        navigation.navigate('OrderSuccess', { 
+          totalPrice,
+          customerInfo,
+          subtotal,
+          shippingFee,
+          shippingMethod});
+      } catch (error) {
+        console.error(error);
+        Alert.alert('Lỗi', 'Đã xảy ra lỗi, vui lòng thử lại sau');
+      }
+    }
+  };
+
   const handleConfirm = () => {
     Alert.alert(
       'Xác nhận',
       'Xác nhận thanh toán?',
-
       [
         {
           text: 'Hủy bỏ',
@@ -19,12 +84,7 @@ const BankCardScreen = ({ navigation }) => {
         },
         {
           text: 'Đồng ý',
-          onPress: () => {
-
-
-            navigation.navigate('OrderSuccess');
-
-          },
+          onPress: handleSave,
         },
       ],
       { cancelable: false }
@@ -35,130 +95,103 @@ const BankCardScreen = ({ navigation }) => {
     <View>
       <View style={styles.headerBar}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <View>
-            <Image
-              source={require('../img/back1.png')}
-              style={{ width: 25, height: 25 }}
-              resizeMode="cover"
-            />
-          </View>
+          <Image
+            source={require('../img/back1.png')}
+            style={{ width: 25, height: 25 }}
+            resizeMode="cover"
+          />
         </TouchableOpacity>
         <Text style={styles.cart}>Thanh toán</Text>
       </View>
 
       <View style={{ marginHorizontal: 20 }}>
-        {/* Thông tin khách hàng */}
-
         <ScrollView>
-          <Text style={{ color: 'black', fontSize: 20, fontWeight: 'normal' }}>Nhập thông tin thẻ</Text>
-          <View style={{ borderBottomColor: 'gray', borderBottomWidth: 1, marginTop: 5 }} />
+          <Text style={styles.sectionTitle}>Nhập thông tin thẻ</Text>
+          <View style={styles.separator} />
 
           <TextInput
-            style={styles.text}
+            style={styles.textInput}
             value={soThe}
-            onChangeText={(txt) => { setSoThe(txt) }}
+            onChangeText={setSoThe}
             placeholder="Nhập số thẻ"
             placeholderTextColor="gray"
           />
-          <View style={{ borderBottomColor: 'gray', borderBottomWidth: 1, }} />
+          {showErrors && errors.soThe && (
+            <Text style={styles.errorText}>{errors.soThe}</Text>
+          )}
 
           <TextInput
-            style={styles.text}
+            style={styles.textInput}
             value={chuThe}
-            onChangeText={(txt) => { setChuThe(txt) }}
+            onChangeText={setChuThe}
             placeholder="Tên chủ thẻ"
             placeholderTextColor="gray"
           />
-          <View style={{ borderBottomColor: 'gray', borderBottomWidth: 1,  }} />
+          {showErrors && errors.chuThe && (
+            <Text style={styles.errorText}>{errors.chuThe}</Text>
+          )}
 
           <TextInput
-            style={styles.text}
+            style={styles.textInput}
             value={ngay}
-            onChangeText={(txt) => { setNgay(txt) }}
+            onChangeText={setNgay}
             placeholder="Ngày hết hạn"
             placeholderTextColor="gray"
           />
-          <View style={{ borderBottomColor: 'gray', borderBottomWidth: 1,  }} />
+          {showErrors && errors.ngay && (
+            <Text style={styles.errorText}>{errors.ngay}</Text>
+          )}
 
           <TextInput
-            style={styles.text}
+            style={styles.textInput}
             value={CVV}
-            onChangeText={(txt) => { setCVV(txt) }}
+            onChangeText={setCVV}
             placeholder="CVV"
             placeholderTextColor="gray"
           />
-          <View style={{ borderBottomColor: 'gray', borderBottomWidth: 1, }} />
+          {showErrors && errors.CVV && (
+            <Text style={styles.errorText}>{errors.CVV}</Text>
+          )}
 
-          {/* Phương thức vận chuyển */}
+          <Text style={styles.sectionTitle}>Thông tin khách hàng</Text>
+          <View style={styles.separator} />
+          <Text style={styles.userInfoText}>{username}</Text>
+          <Text style={styles.userInfoText}>{email}</Text>
+          <Text style={styles.userInfoText}>{address}</Text>
+          <Text style={styles.userInfoText}>{sdt}</Text>
 
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ color: 'black', fontSize: 20, fontWeight: 'normal', marginTop: 30 }}>Thông tin khách hàng</Text>
-            <TouchableOpacity onPress={() => { }}>
-              <Text style={{ top: 35, fontSize: 17 }}>Chỉnh sửa</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={{ borderBottomColor: 'gray', borderBottomWidth: 1, marginTop: 5 }} />
-
-          <Text style={{ color: 'gray', fontSize: 18, fontWeight: 'normal', marginTop: 15 }}>Phạm Kiều Trinh</Text>
-          <Text style={{ color: 'gray', fontSize: 18, fontWeight: 'normal', marginTop: 10 }}>trinhpkph31536@fpt.edu.vn</Text>
-
-
-
-          <Text style={{ color: 'gray', fontSize: 18, fontWeight: 'normal', marginTop: 10 }}>60 Láng Hạ, Ba Đình Hà Nội</Text>
-          <Text style={{ color: 'gray', fontSize: 18, fontWeight: 'normal', marginTop: 10 }}>0123456789</Text>
-
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ color: 'black', fontSize: 20, fontWeight: 'normal', marginTop: 20 }}>Phương thức vận chuyển</Text>
-            <TouchableOpacity onPress={() => { }}>
-              <Text style={{ top: 25, fontSize: 17 }}>Chỉnh sửa</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={{ borderBottomColor: 'gray', borderBottomWidth: 1, marginTop: 5 }} />
-
-          <Text style={{ color: 'gray', fontSize: 18, fontWeight: 'normal', marginTop: 15 }}>Giao hàng nhanh - 15.000đ</Text>
-          <Text style={{ color: 'gray', fontSize: 18, fontWeight: 'normal', }}>(Dự kiến giao hàng 10-15/3)</Text>
-
-
-
-
+          <Text style={styles.sectionTitle}>Phương thức vận chuyển</Text>
+          <View style={styles.separator} />
+          <Text style={styles.shippingMethodText}>{shippingMethod}</Text>
+          <Text style={styles.deliveryEstimateText}>(Dự kiến giao hàng 10-15/3)</Text>
         </ScrollView>
       </View>
 
-
-      {/* Thanh toán */}
-
       <View>
-
-
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 30, marginHorizontal: 20 }}>
-
-          <Text style={{ color: 'gray', fontSize: 18, fontWeight: 'normal' }}>Tạm tính</Text>
-          <Text style={{ color: 'black', fontSize: 18, fontWeight: 'normal' }}>500.000</Text>
+        <View style={styles.totalSection}>
+          <Text style={styles.totalText}>Tạm tính</Text>
+          <Text style={styles.totalText}>{subtotal} $</Text>
         </View>
 
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: 20 }}>
-
-          <Text style={{ color: 'gray', fontSize: 18, fontWeight: 'normal' }}>Phí vận chuyển</Text>
-          <Text style={{ color: 'black', fontSize: 18, fontWeight: 'normal' }}>15.000</Text>
+        <View style={styles.totalSection}>
+          <Text style={styles.totalText}>Phí vận chuyển</Text>
+          <Text style={styles.totalText}>{shippingFee} $</Text>
         </View>
 
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: 20 }}>
-
-          <Text style={{ color: 'gray', fontSize: 20, fontWeight: 'normal' }}>Tổng cộng</Text>
-          <Text style={{ color: 'green', fontSize: 18, fontWeight: 'normal' }}>515.000</Text>
+        <View style={styles.totalSection}>
+          <Text style={styles.totalText}>Tổng cộng</Text>
+          <Text style={[styles.totalText, styles.totalAmount]}>{totalPrice} $</Text>
         </View>
 
-        <TouchableOpacity onPress={handleConfirm}
-          style={{ backgroundColor: "green", width: '95%', margin: 10, borderRadius: 10 }}>
-          <Text style={{ color: 'white', textAlign: 'center', fontSize: 20, padding: 10, fontWeight: 'bold' }}>Tiếp tục </Text>
+        <TouchableOpacity onPress={handleConfirm} style={styles.continueButton}>
+          <Text style={styles.continueButtonText}>Tiếp tục</Text>
         </TouchableOpacity>
-
       </View>
     </View>
-  )
+  );
 }
 
-export default BankCardScreen
+export default BankCardScreen;
 
 const styles = StyleSheet.create({
   headerBar: {
@@ -174,8 +207,69 @@ const styles = StyleSheet.create({
     marginTop: 5,
     marginLeft: 130
   },
-  text: {
+  sectionTitle: {
+    color: 'black',
+    fontSize: 20,
+    fontWeight: 'normal',
+    marginTop: 20
+  },
+  separator: {
+    borderBottomColor: 'gray',
+    borderBottomWidth: 1,
+    marginTop: 5
+  },
+  textInput: {
     fontSize: 16,
     marginTop: 5,
+    borderBottomColor: 'gray',
+    borderBottomWidth: 1
   },
-})
+  errorText: {
+    fontSize: 16,
+    color: 'red'
+  },
+  userInfoText: {
+    color: 'gray',
+    fontSize: 18,
+    fontWeight: 'normal',
+    marginTop: 10
+  },
+  shippingMethodText: {
+    color: 'gray',
+    fontSize: 18,
+    fontWeight: 'normal',
+    marginTop: 15
+  },
+  deliveryEstimateText: {
+    color: 'gray',
+    fontSize: 18,
+    fontWeight: 'normal',
+  },
+  totalSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginHorizontal: 20,
+    marginTop: 15
+  },
+  totalText: {
+    color: 'gray',
+    fontSize: 18,
+    fontWeight: 'normal'
+  },
+  totalAmount: {
+    color: 'green'
+  },
+  continueButton: {
+    backgroundColor: "green",
+    width: '95%',
+    margin: 10,
+    borderRadius: 10
+  },
+  continueButtonText: {
+    color: 'white',
+    textAlign: 'center',
+    fontSize: 20,
+    padding: 10,
+    fontWeight: 'bold'
+  }
+});

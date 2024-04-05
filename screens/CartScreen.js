@@ -26,7 +26,7 @@ const CartScreen = ({ navigation, route }) => {
     for (let i = 0; i < cartData.length; i++) {
       const product = listProduct.find(item => item.id == cartData[i].idSP)
       if (product) {
-        const item = { ...product, ...cartData[i] };
+        const item = { ...product, ...cartData[i], isChecked: false };
         for (const key in item.data) {
         if (item.data[key] === '' || (item.giaSP.find(element => element.size === key) && Number(item.data[key]))) {
           listCard.push(item);
@@ -36,7 +36,20 @@ const CartScreen = ({ navigation, route }) => {
       }
       
     }
-    setCart(listCard);
+
+    // Kiểm tra và cập nhật giỏ hàng
+  const updatedCart = [...cart];
+  for (const item of listCard) {
+    const existingIndex = updatedCart.findIndex(cartItem => cartItem.id === item.id);
+    if (existingIndex !== -1) {
+      // Nếu sản phẩm đã tồn tại trong giỏ hàng, cập nhật số lượng
+      updatedCart[existingIndex] = item;
+    } else {
+      // Nếu sản phẩm chưa tồn tại, thêm mới vào giỏ hàng
+      updatedCart.push(item);
+    }
+  }
+    setCart(updatedCart);
   }
 
   useEffect(() => {
@@ -63,6 +76,12 @@ const CartScreen = ({ navigation, route }) => {
     }, [])
   );
 
+  const handleCheckBoxToggle = (index) => {
+    const updatedCart = [...cart];
+    updatedCart[index].isChecked = !updatedCart[index].isChecked;
+    setCart(updatedCart);
+  };
+
   const handleDeleteAll = () => {
     Alert.alert(
       'Xác nhận',
@@ -77,10 +96,24 @@ const CartScreen = ({ navigation, route }) => {
         },
         {
           text: 'Đồng ý',
-          onPress: () => 
+          onPress: async() => 
            
-             
-            ToastAndroid.show('Đã xóa', ToastAndroid.SHORT),
+          {
+            const deletedItems = cart.filter(item => item.isChecked);
+            try {
+              // Lặp qua từng mục được chọn và gửi yêu cầu DELETE đến cơ sở dữ liệu
+              for (const item of deletedItems) {
+                await fetch(`${URL}/carts/${item.id}`, {
+                  method: 'DELETE'
+                });
+              }
+            const updatedCart = cart.filter(item => !item.isChecked);
+            setCart(updatedCart);
+            ToastAndroid.show('Đã xóa', ToastAndroid.SHORT);
+            }catch (error) {
+              console.log('Lỗi khi xóa dữ liệu:', error);
+            }
+          },
               
           
         },
@@ -89,7 +122,7 @@ const CartScreen = ({ navigation, route }) => {
     );
   };
 
-  const handleDelete = () => {
+  const handleDelete = (index) => {
     Alert.alert(
       'Xác nhận',
       'Xóa đơn hàng?',
@@ -103,12 +136,32 @@ const CartScreen = ({ navigation, route }) => {
         },
         {
           text: 'Đồng ý',
-          onPress: () => 
-           
-             
-            ToastAndroid.show('Đã xóa', ToastAndroid.SHORT),
-              
-          
+          onPress: async () => {
+            const item = cart[index];
+            const idToDelete = cart[index].id; // Lấy ID của mục cần xóa
+            if (Object.keys(item.data).length > 1) {
+              // Nếu sản phẩm có nhiều hơn một kích thước, chỉ cần xóa kích thước hiện tại
+              const selectedSize = Object.keys(item.data)[index];
+              delete item.data[selectedSize];
+              const updatedCart = [...cart];
+              updatedCart[index] = item;
+              setCart(updatedCart);
+            } else {
+              // Nếu sản phẩm chỉ có một kích thước, xóa hoàn toàn sản phẩm
+            try {
+            await fetch(`${URL}/carts/${idToDelete}`, {
+              method: 'DELETE'
+            });
+            const updatedCart = [...cart];
+            updatedCart.splice(index, 1);
+            setCart(updatedCart);
+            ToastAndroid.show('Đã xóa', ToastAndroid.SHORT);
+          } catch (error) {
+            console.log('Lỗi khi xóa dữ liệu:', error);
+          }
+        
+          }  
+        } 
         },
       ],
       { cancelable: false }
@@ -142,10 +195,12 @@ const CartScreen = ({ navigation, route }) => {
 
   const CartCard = ({ item, index }) => {
     const [selectedSize, setSelectedSize] = useState(null);
+    const [isChecked, setIsChecked] = useState(false);
 
     const handleSizeSelection = (size) => {
       setSelectedSize(size);
-    };
+      setIsChecked(!isChecked);
+        };
     let show = showItem(item);
    
 
@@ -158,9 +213,9 @@ const CartScreen = ({ navigation, route }) => {
             <CheckBox
 
               disabled={false}
-              value={toggleCheckBox}
+              value={item.isChecked}
               style = {{marginTop: 20, marginRight: 10}}
-              onValueChange={(newValue) => setToggleCheckBox(newValue)}
+              onValueChange={() => handleCheckBoxToggle(index)}// Chỉ cho phép chọn một ô checkbox mỗi lần
             />
             <Image source={{ uri: item.linkAnh }} style={{ height: 90, width: 90, borderRadius: 10, }} />
             <View>
@@ -230,7 +285,7 @@ const CartScreen = ({ navigation, route }) => {
                     <Text style={styles.name}>+</Text>
                   </TouchableOpacity>
 
-                  <TouchableOpacity onPress={handleDelete}>
+                  <TouchableOpacity onPress={() => handleDelete(index)}>
                     <Text style={{ color: 'black', textDecorationLine: 'underline', fontSize: 18, marginLeft: 5 }}>Xóa</Text>
                   </TouchableOpacity>
                 </View>

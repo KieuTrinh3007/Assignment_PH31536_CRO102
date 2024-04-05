@@ -13,7 +13,7 @@ const ListScreen = ({ navigation, route }) => {
 
 
     useEffect(() => {
-        // Fetch dữ liệu từ API ở đây
+        // Fetch dữ liệu từ API ở đây        
         // Ví dụ sử dụng fetch:
         fetch(`${URL}/products`)
             .then((response) => response.json())
@@ -86,10 +86,7 @@ const ListScreen = ({ navigation, route }) => {
                 </ScrollView>
             </View>
 
-            <ScrollView style={{ marginTop: 30 }}
-                contentContainerStyle={{ flexGrow: 1, paddingBottom: 150 }}
-
-            >
+          
                 {(section.filter(item => item.loaiSP === title).length ? section.filter(item => item.loaiSP === title) : [section[0]]) 
                     .map((element, index) => {
                         const condition = element.id === selectedItem;
@@ -151,7 +148,7 @@ const ListScreen = ({ navigation, route }) => {
                         )
                     })}
 
-            </ScrollView>
+          
 
         </View>
     )

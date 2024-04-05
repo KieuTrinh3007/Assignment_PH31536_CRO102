@@ -1,18 +1,35 @@
 import { Image, ScrollView, StyleSheet, Text, TextInput, View, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, ToastAndroid } from 'react-native'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { URL } from './HomeScreen';
 import CheckBox from '@react-native-community/checkbox';
 
 const Login = (props) => {
     const { navigation } = props;
-    const [email, setemail] = useState('trinhpkph31536@fpt.edu.vn');
-    const [password, setpassword] = useState('nhokgl9x');
+    const [email, setemail] = useState('');
+    const [password, setpassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [errors, seterrors] = useState({});
     const [username, setUsername] = useState('');
     const [toggleCheckBox, setToggleCheckBox] = useState(false)
 
+    useEffect(() => {
+        // Lấy thông tin tài khoản từ AsyncStorage khi màn hình được tạo
+        const getAccountInfoFromStorage = async () => {
+            try {
+                const savedEmail = await AsyncStorage.getItem('savedEmail');
+                const savedPassword = await AsyncStorage.getItem('savedPassword');
+                if (savedEmail && savedPassword) {
+                    setemail(savedEmail);
+                    setpassword(savedPassword);
+                    setToggleCheckBox(true); // Đánh dấu đã chọn tùy chọn "Nhớ tài khoản"
+                }
+            } catch (error) {
+                console.log('Lỗi khi lấy thông tin tài khoản từ AsyncStorage:', error);
+            }
+        };
+        getAccountInfoFromStorage();
+    }, []);
 
     const toggleShowPassword = () => {
         setShowPassword(!showPassword);
@@ -50,6 +67,15 @@ const Login = (props) => {
                                 await AsyncStorage.setItem('username', objU.username); // Lưu username vào AsyncStorage
                                 await AsyncStorage.setItem('email', email);
                                 console.log(username);
+                                  // Đăng nhập thành công, lưu thông tin tài khoản vào AsyncStorage nếu người dùng chọn tùy chọn "Nhớ tài khoản"
+                if (toggleCheckBox) {
+                    await AsyncStorage.setItem('savedEmail', email);
+                    await AsyncStorage.setItem('savedPassword', password);
+                } else {
+                    // Xóa thông tin tài khoản trong AsyncStorage nếu người dùng không chọn tùy chọn "Nhớ tài khoản"
+                    await AsyncStorage.removeItem('savedEmail');
+                    await AsyncStorage.removeItem('savedPassword');
+                }
                                 seterrors({});
                                 ToastAndroid.show('Đăng nhập thành công', ToastAndroid.SHORT);
                                 props.navigation.navigate('DrawerNavigator');

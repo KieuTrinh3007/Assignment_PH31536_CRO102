@@ -86,7 +86,8 @@ const KienThuc = ({ navigation, route }) => {
 
             <View style={{ flexDirection: 'row' }}>
                 <Text style={{ backgroundColor: 'green', width: '30%',textAlign: 'center', padding: 5, color: 'white', marginHorizontal: 30, paddingLeft: 13, marginVertical: 20 }}>{loaiSP}</Text>
-                <Text style={{ backgroundColor: 'green', width: '30%', padding: 5, textAlign: 'center',color: 'white', marginHorizontal: 30, paddingLeft: 13, marginVertical: 20 }}>{classify}</Text>
+                { classify ? <Text style={{ backgroundColor: 'green', width: '30%', padding: 5, textAlign: 'center',color: 'white', marginHorizontal: 30, paddingLeft: 13, marginVertical: 20 }}>{classify}</Text>
+: null}
             </View>
             <View style={{ marginHorizontal: 30 }}>
 
@@ -390,7 +391,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         color: "black",
         marginTop: 10,
-        marginLeft: 120
+        marginLeft: 100
     },
     image1: {
         width: 40,
