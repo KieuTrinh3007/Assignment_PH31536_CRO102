@@ -23,6 +23,12 @@
       "username": "trinhhhhh",
       "email": "kieutrinh300720004@gmail.com",
       "password": "1234567"
+    },
+    {
+      "id": 1712332791251.7625,
+      "username": "Pham Kieu Trinh",
+      "email": "trinh30072004@gmail.com",
+      "password": "123456"
     }
   ],
   "products": [
@@ -416,6 +422,34 @@
         "Vừa": "2"
       },
       "totalPrice": 6.3
+    },
+    {
+      "id": "7eed",
+      "idSP": "2",
+      "createAt": "1712327974085",
+      "data": {
+        "Vừa": "1"
+      },
+      "totalPrice": 3.15
+    },
+    {
+      "id": "a849",
+      "idSP": "2",
+      "createAt": "1712328750173",
+      "data": {
+        "Vừa": "1"
+      },
+      "totalPrice": 3.15
+    },
+    {
+      "id": "a8ba",
+      "idSP": "1",
+      "createAt": "1712332905273",
+      "data": {
+        "Vừa": "1",
+        "Lớn": "1"
+      },
+      "totalPrice": 7.44
     }
   ],
   "customers": [
@@ -453,6 +487,21 @@
       "id": "6fd8",
       "sdt": "0874532210",
       "address": "Ha Noi"
+    },
+    {
+      "id": "4b5d",
+      "sdt": "0997765658",
+      "address": "Dong Da"
+    },
+    {
+      "id": "d942",
+      "sdt": "0987665647",
+      "address": "Aaa"
+    },
+    {
+      "id": "55a4",
+      "sdt": "0897755433",
+      "address": "Hoa Lac"
     }
   ],
   "payments": [
@@ -497,6 +546,27 @@
       "chuThe": "Ann",
       "ngay": "20/03/2026",
       "CVV": "2456"
+    },
+    {
+      "id": "49ab",
+      "soThe": "12387675644",
+      "chuThe": "Chinn",
+      "ngay": "20/03/2024",
+      "CVV": "1625"
+    },
+    {
+      "id": "20cb",
+      "soThe": "987654453",
+      "chuThe": "jghh",
+      "ngay": "20/03/2025",
+      "CVV": "1254"
+    },
+    {
+      "id": "c239",
+      "soThe": "98786555697",
+      "chuThe": "Pham Kieu Trinh",
+      "ngay": "20/03/2026",
+      "CVV": "3457"
     }
   ]
 }

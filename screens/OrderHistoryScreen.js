@@ -88,7 +88,7 @@ const OrderHistoryScreen = ({ navigation, route }) => {
                 </Text>
               </View>
 
-              <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 25,}}>$ {item.totalPrice.toFixed(2)}</Text>
+              <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 20,}}>$ {item.totalPrice.toFixed(2)}</Text>
             </View>
 
             <View>
@@ -113,9 +113,9 @@ const OrderHistoryScreen = ({ navigation, route }) => {
                     >
                       {option.size}</Text>
 
-                    <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 20, top: 25, left: 20 }}> $ {option.price}</Text>
+                    <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 17, top: 25, left: 20 }}> $ {option.price}</Text>
                     <Text style={{ color: 'green', fontWeight: 'bold', fontSize: 20, top: 25, left: 70  }}>X</Text>
-                    <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 19, top: 25, left: 75  }}>{item.data[option.size]}</Text>
+                    <Text style={{ color: 'green', fontWeight: 'bold', fontSize: 19, top: 25, left: 75  }}>{item.data[option.size]}</Text>
                     <Text style={{ color: 'orange', fontWeight: 'bold', fontSize: 19, top: 25, left: 130 }}>{(Number(item.data[option.size]) * option.price).toFixed(2)}</Text>
                    
                   </View>

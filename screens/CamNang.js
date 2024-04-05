@@ -134,7 +134,6 @@ const CamNang = ({ navigation, route }) => {
 
       <FlatList
         data={cart}
-
         renderItem={({ item, index }) => <CartCard key={item.id} item={item} index={index} />}
 
       /> 

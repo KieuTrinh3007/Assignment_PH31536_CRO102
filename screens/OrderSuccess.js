@@ -62,10 +62,10 @@ const OrderSuccess = ({ navigation, route }) => {
                 </TouchableOpacity>
                 <Text style={styles.cart}>Thông báo</Text>
 
-                <TouchableOpacity onPress={() => navigation.navigate('CartScreen')}>
+                <TouchableOpacity onPress={() => navigation.navigate('TabNavigator')}>
                     <Image style={{ width: 25, height: 25 }}
                         resizeMode="cover"
-                        source={require('../img/cart.png')}
+                        source={require('../img/home.png')}
                     />
                 </TouchableOpacity>
             </View>
@@ -113,7 +113,7 @@ const OrderSuccess = ({ navigation, route }) => {
                     <Text style={{ color: 'black', fontSize: 18, fontWeight: 'normal' }}>{totalPrice} $</Text>
                 </View>
 
-                <TouchableOpacity onPress={() => navigation.navigate('CamNang')}
+                <TouchableOpacity onPress={() => navigation.navigate('CamNang', {data: cart})}
                     style={{ backgroundColor: "green", width: '95%', margin: 10, borderRadius: 10 }}>
                     <Text style={{ color: 'white', textAlign: 'center', fontSize: 20, padding: 10, fontWeight: 'bold' }}>Xem cẩm nang trồng cây </Text>
                 </TouchableOpacity>

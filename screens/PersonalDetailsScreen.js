@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         padding: 10,
         margin: 20,
-        color: "white",
+        color: "black",
         fontSize: 20
     },
     khungButton: {

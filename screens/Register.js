@@ -210,7 +210,7 @@ const Register = ({ navigation }) => {
                         onPress={() => handelRegister()}
                         style={st.khungButton}
                     >
-                        <Text style={{ color: "white", textAlign: 'center', fontSize: 20, fontWeight: 'bold' }}>Đăng ký</Text>
+                        <Text style={{ color: "black", textAlign: 'center', fontSize: 20, fontWeight: 'bold' }}>Đăng ký</Text>
                     </TouchableOpacity>
 
                     <View style={st.container}>
@@ -271,7 +271,7 @@ const st = StyleSheet.create({
     background: { ...StyleSheet.absoluteFillObject, backgroundColor: "white" },
     welcom: { fontSize: 30, textAlign: "center", color: "black", fontWeight: 'bold' },
     welcom2: { fontSize: 18, textAlign: "center", color: "black", marginTop: 10, },
-    khung: { borderColor: "#C0C0C0", borderWidth: 1, borderRadius: 10, padding: 10, marginHorizontal: 20, marginVertical: 10, color: "white", fontSize: 18 },
+    khung: { borderColor: "#C0C0C0", borderWidth: 1, borderRadius: 10, padding: 10, marginHorizontal: 20, marginVertical: 10, color: "black", fontSize: 18 },
     khungButton: { backgroundColor: "#007537", borderWidth: 1, borderRadius: 20, padding: 15, margin: 15 },
     khungButton1: { backgroundColor: "#FFFFFF", borderWidth: 1, borderRadius: 25, padding: 15, margin: 15, marginTop: 5 },
     container: {
